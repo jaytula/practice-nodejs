@@ -1,0 +1,7 @@
+body {
+    background: #ccc;
+}
+
+li.active {
+    color: yellow;
+}

@@ -25,15 +25,13 @@ module.exports = class Product {
     });
   }
 
-  static async fetchAll() {
-    return new Promise((resolve, reject) => {
-      let products = [];
-      fs.readFile(FILEPATH, (err, fileContent) => {
-        if (!err) {
-          products = JSON.parse(fileContent);
-        }
-        return resolve(products);
-      });
+  static fetchAll(cb) {
+    let products = [];
+    fs.readFile(FILEPATH, (err, fileContent) => {
+      if (!err) {
+        products = JSON.parse(fileContent);
+      }
+      return cb(products);
     });
   }
 };

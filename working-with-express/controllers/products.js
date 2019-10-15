@@ -16,8 +16,8 @@ exports.postAddProduct = (req, res, next) => {
   res.redirect('/');
 };
 
-exports.getProducts = (req, res, next) => {
-  const products = Product.fetchAll();
+exports.getProducts = async (req, res, next) => {
+  const products = await Product.fetchAll();
   res.render('shop', {
     pageTitle: 'Shop',
     path: '/',

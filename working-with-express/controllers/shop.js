@@ -23,13 +23,15 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll(function(products) {
+  Product.fetchAll().then(([rows, fieldData]) => {
     res.render('shop/index', {
       pageTitle: 'Shop',
       path: '/',
-      prods: products
+      prods: rows
     });
-  });
+  }).catch(err => {
+    console.log(err);
+  })
 };
 
 exports.getCart = (req, res, next) => {
@@ -61,8 +63,8 @@ exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   Cart.deleteProduct(prodId, () => {
     res.redirect('/cart');
-  })
-}
+  });
+};
 
 exports.getOrders = (req, res, next) => {
   res.render('shop/orders', { path: '/orders', pageTitle: 'Your Orders' });

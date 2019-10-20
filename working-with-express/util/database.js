@@ -4,10 +4,7 @@ const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: 'example',
-    database: 'node-complete',
-    waitForConnection: true,
-    connectionLimit: 10,
-    queueLimit: 0
+    database: 'node-complete'
 });
 
 module.exports = pool.promise();

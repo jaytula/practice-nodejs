@@ -2,9 +2,14 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 
+
+const errorController = require('./controllers/error');
+const db = require('./util/database');
+
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
-const errorController = require('./controllers/error');
+
+db.execute('SELECT * FROM products');
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));

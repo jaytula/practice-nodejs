@@ -10,17 +10,18 @@ module.exports = class Product {
   }
 
   save() {
-    ;
+    return db.execute(
+      `INSERT INTO products (title, imageUrl, description, price)
+      VALUES (?, ?, ?, ?)`,
+      [this.title, this.imageUrl, this.description, this.price]
+    );
   }
 
   static fetchAll() {
     return db.execute('SELECT * FROM products');
   }
 
-  static findById(id, cb) {
-  }
+  static findById(id, cb) {}
 
-  static deleteById(id, cb) {
-    
-  }
+  static deleteById(id, cb) {}
 };

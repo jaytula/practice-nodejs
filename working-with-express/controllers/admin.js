@@ -14,7 +14,9 @@ exports.getEditProduct = (req, res, next) => {
   if (!editMode) {
     res.redirect('/');
   }
-  Product.findByPk(req.params.productId)
+  req.user.getProducts({where: {id: req.params.productId}})
+  //Product.findByPk(req.params.productId)
+    .then(products => products[0])
     .then(product => {
       res.render('admin/edit-product', {
         pageTitle: 'Edit Product',
@@ -73,7 +75,9 @@ exports.postDeleteProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.findAll().then(products => {
+  req.user.getProducts()
+  //Product.findAll()
+  .then(products => {
     res.render('admin/products', {
       prods: products,
       pageTitle: 'Admin Products',

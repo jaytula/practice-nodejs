@@ -2,12 +2,13 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 
-
 const errorController = require('./controllers/error');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
+const sequelize = require('./util/database');
+//const Product = require('./models/product');
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
@@ -21,7 +22,15 @@ app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 
 app.use(errorController.get404);
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Listening on ${PORT}`);
-});
+
+sequelize
+  .sync()
+  .then(result => {
+    const PORT = 3000;
+    app.listen(PORT, () => {
+      console.log(`Listening on ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.log(err);
+  });

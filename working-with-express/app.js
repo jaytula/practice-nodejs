@@ -47,7 +47,8 @@ CartItem.belongsTo(Cart, { constraints: true, onDelete: 'CASCASE' });
 Cart.hasMany(CartItem);
 
 sequelize
-  .sync({force: true})
+  .sync()
+  // .sync({force: true})
   .then(result => {
     return User.findByPk(1);
   })
@@ -59,6 +60,9 @@ sequelize
       });
     }
     return user;
+  })
+  .then(user => {
+    return user.createCart();
   })
   .then(() => {
     const PORT = 3000;

@@ -47,8 +47,8 @@ CartItem.belongsTo(Cart, { constraints: true, onDelete: 'CASCASE' });
 Cart.hasMany(CartItem);
 
 sequelize
-  .sync()
-  // .sync({force: true})
+  //.sync()
+  .sync({force: true})
   .then(result => {
     return User.findByPk(1);
   })

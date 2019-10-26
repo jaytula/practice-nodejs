@@ -61,7 +61,7 @@ sequelize
     return user;
   })
   .then(user => {
-    return user.createCart().catch(err => console.log(err));
+    return user.createCart().catch(err => () => { });
   })
   .then(() => {
     const PORT = 3000;

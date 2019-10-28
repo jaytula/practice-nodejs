@@ -1,4 +1,4 @@
-const mongoConnect = require('../util/database');
+const { getDb } = require('../util/database');
 class Product {
   constructor(title, price, description, imageUrl) {
     this.title = title;
@@ -7,9 +7,7 @@ class Product {
     this.imageUrl = imageUrl;
   }
 
-  save() {
-    
-  }
+  save() {}
 }
 
 // const Product = sequelize.define('product', {

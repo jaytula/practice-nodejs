@@ -12,6 +12,8 @@ const Product = require('./models/product');
 const User = require('./models/user');
 const Cart = require('./models/cart');
 const CartItem = require('./models/cart-item');
+const Order = require('./models/order');
+const OrderItem = require('./models/order-item');
 
 const app = express();
 
@@ -46,8 +48,17 @@ Product.belongsToMany(Cart, { through: CartItem });
 CartItem.belongsTo(Cart, { constraints: true, onDelete: 'CASCASE' });
 Cart.hasMany(CartItem);
 
+User.hasMany(Order);
+
+Order.belongsTo(User);
+User.hasMany(Order);
+
+Order.belongsToMany(Product, { through: OrderItem });
+//Product.belongsToMany(Order, { through: OrderItem });
+
 sequelize
-  .sync()
+  .sync({force: true})
+  //.sync()
   .then(result => {
     return User.findByPk(1);
   })
@@ -61,7 +72,7 @@ sequelize
     return user;
   })
   .then(user => {
-    return user.createCart().catch(err => () => { });
+    return user.createCart().catch(err => () => {});
   })
   .then(() => {
     const PORT = 3000;

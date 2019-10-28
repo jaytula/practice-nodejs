@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const errorController = require('./controllers/error');
 const mongoConnect = require('./util/database');
 
-// const adminRoutes = require('./routes/admin');
+const adminRoutes = require('./routes/admin');
 // const shopRoutes = require('./routes/shop');
 
 const app = express();
@@ -26,7 +26,7 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// app.use('/admin', adminRoutes);
+app.use('/admin', adminRoutes);
 // app.use(shopRoutes);
 
 app.use(errorController.get404);

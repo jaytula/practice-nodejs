@@ -22,6 +22,7 @@ app.use((req, res, next) => {
   //     next();
   //   })
   //   .catch(err => console.log(err));
+  next();
 });
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -32,8 +33,6 @@ app.use('/admin', adminRoutes);
 app.use(errorController.get404);
 
 mongoConnect(client => {
-  console.log(client);
-
   const PORT = 3000;
   app.listen(PORT, () => {
     console.log(`Listening on ${PORT}`);

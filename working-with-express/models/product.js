@@ -29,10 +29,7 @@ class Product {
       .find()
       .toArray()
       .then(products => {
-        return products.map(product => {
-          product.id = product._id;
-          return product;
-        });
+        return products;
       })
       .catch(err => console.log(err));
   }

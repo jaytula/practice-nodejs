@@ -11,7 +11,7 @@ const User = require('./models/user');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
-const PORT = 3000;
+const PORT = 3001;
 const app = express();
 
 app.set('view engine', 'ejs');
@@ -25,7 +25,6 @@ app.use((req, res, next) => {
       next();
     })
     .catch(err => console.log(err));
-  next();
 });
 
 app.use(bodyParser.urlencoded({ extended: false }));

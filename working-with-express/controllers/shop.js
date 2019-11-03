@@ -47,18 +47,6 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  // const cartItems =
-  //   req.user.cart && req.user.cart.items ? req.user.cart.items : [];
-
-  // return Promise.all(
-  //   cartItems.map(cartItem => {
-  //     console.log(cartItem);
-  //     return Product.findById(cartItem.productId).then(product => {
-  //       return { ...cartItem, title: product.title }
-  //     })
-  //   })
-  // )
-
   req.user.getCart()
   .then(cartItems => {
     res.render('shop/cart', {

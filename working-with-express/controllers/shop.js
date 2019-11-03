@@ -78,8 +78,8 @@ exports.postCart = (req, res, next) => {
     })
     .then(result => {
       console.log(result);
-      return result;
-    });
+      res.redirect('/cart');
+    })
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {

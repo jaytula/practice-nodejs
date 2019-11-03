@@ -47,23 +47,39 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  res.render('shop/cart', {
-    path: '/cart',
-    pageTitle: 'Your Cart',
-    products: req.user.cart ? req.user.cart.items : []
+  // const cartItems =
+  //   req.user.cart && req.user.cart.items ? req.user.cart.items : [];
+
+  // return Promise.all(
+  //   cartItems.map(cartItem => {
+  //     console.log(cartItem);
+  //     return Product.findById(cartItem.productId).then(product => {
+  //       return { ...cartItem, title: product.title }
+  //     })
+  //   })
+  // )
+
+  req.user.getCart()
+  .then(cartItems => {
+    res.render('shop/cart', {
+      path: '/cart',
+      pageTitle: 'Your Cart',
+      products: cartItems
+    });
   });
 };
 
 exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
 
-  Product.findById(prodId).then(product => {
-    return req.user.addToCart(product);
-  }).then(result => {
-    console.log(result);
-    return result;
-  });
-
+  Product.findById(prodId)
+    .then(product => {
+      return req.user.addToCart(product);
+    })
+    .then(result => {
+      console.log(result);
+      return result;
+    });
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {

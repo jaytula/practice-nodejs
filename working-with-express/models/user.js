@@ -16,17 +16,30 @@ class User {
   }
 
   addToCart(product) {
-    // const cartProduct = this.cart.items.findIndex(cp => {
-    //   return cp._id === product._id;
-    // });
+    const cartProductIndex = this.cart.items.findIndex(cp => {
+      return cp.productId.equals(product._id);
+    });
+
+    const updatedCartItems = [...this.cart.items];
+
+    if (cartProductIndex > -1) {
+      updatedCartItems[cartProductIndex].quantity += 1;
+    } else {
+      updatedCartItems.push({
+        productId: new mongodb.ObjectId(product._id),
+        quantity: 1
+      });
+    }
     const updatedCart = {
-      items: [{ productId: new mongodb.ObjectId(product._id), quantity: 1 }]
+      items: updatedCartItems
     };
     const db = getDb();
-    return db.collection('users').updateOne(
-      { _id: new mongodb.ObjectId(this._id) },
-      { $set: { cart: updatedCart } }
-    );
+    return db
+      .collection('users')
+      .updateOne(
+        { _id: new mongodb.ObjectId(this._id) },
+        { $set: { cart: updatedCart } }
+      );
   }
 
   static findById(id) {

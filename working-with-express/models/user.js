@@ -45,7 +45,10 @@ class User {
 
   getCart() {
     const db = getDb();
-    const productIds = this.cart && this.cart.items ? this.cart.items.map(item => item.productId) : [];
+    const productIds =
+      this.cart && this.cart.items
+        ? this.cart.items.map(item => item.productId)
+        : [];
     return db
       .collection('products')
       .find({ _id: { $in: productIds } })
@@ -79,15 +82,41 @@ class User {
   addOrder() {
     const db = getDb();
 
+    return this.getCart().then(products => {
+      const order = {
+        items: products,
+        user: {
+          _id: new mongodb.ObjectId(this._id),
+          name: this.name,
+          email: this.email
+        }
+      };
+
+      return db
+        .collection('orders')
+        .insertOne(order)
+        .then(result => {
+          this.cart = { items: [] };
+          db.collection('users').updateOne(
+            { _id: new mongodb.ObjectId(this._id) },
+            {
+              $set: { cart: { items: [] } }
+            }
+          );
+        });
+    });
+  }
+
+  getOrders() {
+    const db = getDb();
+
     return db
       .collection('orders')
-      .insertOne(this.cart)
-      .then(result => {
-        this.cart = { items: [] };
-        db.collection('users').updateOne(
-          { _id: new mongodb.ObjectId(this._id) },
-          { $set: { cart: { items: [] } } }
-        );
+      .find()
+      .toArray()
+      .then(orders => {
+        console.log(orders);
+        return orders;
       });
   }
 

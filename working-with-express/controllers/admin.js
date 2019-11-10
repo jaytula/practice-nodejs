@@ -28,13 +28,13 @@ exports.getEditProduct = (req, res, next) => {
 exports.postAddProduct = (req, res, next) => {
   const { title, imageUrl, price, description } = req.body;
 
-  const product = new Product(title, price, description, imageUrl, null, req.user._id);
+  const product = new Product({title, price, imageUrl, description});
   product
-    .save()
-    .then(() => {
+    .save().then(
+      err => {
+      if(err) return console.log(err);
       res.redirect('/admin/products');
     })
-    .catch(err => console.log(err));
 };
 
 exports.postEditProduct = (req, res, next) => {

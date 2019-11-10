@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Product = require('../models/product');
 
 exports.getAddProduct = (req, res, next) => {
@@ -62,7 +63,8 @@ exports.postEditProduct = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
   const { productId } = req.body;
 
-  Product.deleteById(productId)
+  //Product.deleteOne({_id: new mongoose.Types.ObjectId(productId)})
+  Product.findByIdAndDelete(productId)
     .then(result => {
       console.log('DESTROYED PRODUCT');
       return result;

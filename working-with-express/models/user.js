@@ -8,7 +8,7 @@ const userSchema = new Schema({
     items: {
       type: [
         {
-          productId: { type: Schema.Types.ObjectId, required: true },
+          productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
           quantity: { type: Number, required: true }
         }
       ]

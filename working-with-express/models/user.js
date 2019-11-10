@@ -112,10 +112,9 @@ class User {
 
     return db
       .collection('orders')
-      .find()
+      .find({"user._id": new mongodb.ObjectId(this._id)})
       .toArray()
       .then(orders => {
-        console.log(orders);
         return orders;
       });
   }

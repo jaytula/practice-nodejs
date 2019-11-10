@@ -45,8 +45,11 @@ exports.postEditProduct = (req, res, next) => {
   updatedDesc = req.body.description;
   
   Product.findById(prodId)
-    .then(productData => {
-      const product = new Product(updatedTitle, updatedPrice, updatedDesc, updatedImageUrl, prodId)
+    .then(product => {
+      product.title = updatedTitle;
+      product.price = updatedPrice;
+      product.description = updatedDesc;
+      product.imageUrl = updatedImageUrl;
 
       return product.save();
     })
@@ -72,7 +75,7 @@ exports.postDeleteProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll().then(products => {
+  Product.find().then(products => {
     res.render('admin/products', {
       prods: products,
       pageTitle: 'Admin Products',

@@ -2,9 +2,9 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const errorController = require('./controllers/error');
-const { mongoConnect} = require('./util/database');
 
 const User = require('./models/user');
 
@@ -34,8 +34,8 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-mongoConnect(client => {
+mongoose.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}).then(result => { 
   app.listen(PORT, () => {
     console.log(`Listening on ${PORT}`);
   });
-});
+}).catch(err => console.log(err))

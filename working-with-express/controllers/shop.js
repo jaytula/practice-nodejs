@@ -107,37 +107,6 @@ exports.postOrder = (req, res, next) => {
     .then(result => {
       res.redirect("/orders");
     });
-
-  //   return this.getCart().then(products => {
-  //     const order = {
-  //       items: products,
-  //       user: {
-  //         _id: new mongodb.ObjectId(this._id),
-  //         name: this.name,
-  //         email: this.email
-  //       }
-  //     };
-
-  //     return db
-  //       .collection('orders')
-  //       .insertOne(order)
-  //       .then(result => {
-  //         this.cart = { items: [] };
-  //         db.collection('users').updateOne(
-  //           { _id: new mongodb.ObjectId(this._id) },
-  //           {
-  //             $set: { cart: { items: [] } }
-  //           }
-  //         );
-  //       });
-  //   });
-
-  //   req.user
-  //     .addOrder()
-  //     .then(() => {
-  //       res.redirect('/orders');
-  //     })
-  //     .catch(err => console.log(err));
 };
 
 exports.getOrders = (req, res, next) => {

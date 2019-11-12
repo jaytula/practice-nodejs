@@ -8,13 +8,48 @@ const userSchema = new Schema({
     items: {
       type: [
         {
-          productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+          productId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Product',
+            required: true
+          },
           quantity: { type: Number, required: true }
         }
       ]
     }
   }
 });
+
+userSchema.methods.addToCart = function(product) {
+  const cartProductIndex = this.cart.items.findIndex(cp => {
+    return cp.productId.equals(product._id);
+  });
+
+  const updatedCartItems = [...this.cart.items];
+
+  if (cartProductIndex > -1) {
+    updatedCartItems[cartProductIndex].quantity += 1;
+  } else {
+    updatedCartItems.push({
+      productId: product._id,
+      quantity: 1
+    });
+  }
+
+  console.log(1);
+  console.log({updatedCartItems});
+  const updatedCart = {
+    items: updatedCartItems
+  };
+  console.log(2);
+  console.log(updatedCart);
+
+  this.cart = updatedCart;
+
+  console.log(3);
+  console.log({cart: this.cart});
+  return this.save();
+};
 
 module.exports = mongoose.model('User', userSchema);
 

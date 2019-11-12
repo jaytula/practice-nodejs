@@ -36,18 +36,12 @@ userSchema.methods.addToCart = function(product) {
     });
   }
 
-  console.log(1);
-  console.log({updatedCartItems});
   const updatedCart = {
     items: updatedCartItems
   };
-  console.log(2);
-  console.log(updatedCart);
 
   this.cart = updatedCart;
 
-  console.log(3);
-  console.log({cart: this.cart});
   return this.save();
 };
 

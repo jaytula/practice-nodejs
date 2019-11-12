@@ -1,14 +1,14 @@
-const Product = require('../models/product');
-// const Order = require('../models/order');
+const Product = require("../models/product");
+const Order = require("../models/order");
 // const OrderItem = require('../models/order-item');
 // const Cart = require('../models/cart');
 
 exports.getProducts = (req, res, next) => {
   Product.find()
     .then(products => {
-      res.render('shop/product-list', {
-        pageTitle: 'All Products',
-        path: '/products',
+      res.render("shop/product-list", {
+        pageTitle: "All Products",
+        path: "/products",
         prods: products
       });
     })
@@ -21,8 +21,8 @@ exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
   Product.findById(prodId)
     .then(product => {
-      res.render('shop/product-detail', {
-        path: '/products',
+      res.render("shop/product-detail", {
+        path: "/products",
         pageTitle: product.title,
         product
       });
@@ -35,9 +35,9 @@ exports.getProduct = (req, res, next) => {
 exports.getIndex = (req, res, next) => {
   Product.find()
     .then(products => {
-      res.render('shop/index', {
-        pageTitle: 'Shop',
-        path: '/',
+      res.render("shop/index", {
+        pageTitle: "Shop",
+        path: "/",
         prods: products
       });
     })
@@ -47,15 +47,17 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  req.user.populate('cart.items.productId').execPopulate()
-  .then(result => {
-    console.log(result.cart.items);
-    res.render('shop/cart', {
-      path: '/cart',
-      pageTitle: 'Your Cart',
-      products: result.cart.items
+  req.user
+    .populate("cart.items.productId")
+    .execPopulate()
+    .then(result => {
+      console.log(result.cart.items);
+      res.render("shop/cart", {
+        path: "/cart",
+        pageTitle: "Your Cart",
+        products: result.cart.items
+      });
     });
-  });
 };
 
 exports.postCart = (req, res, next) => {
@@ -67,8 +69,8 @@ exports.postCart = (req, res, next) => {
     })
     .then(result => {
       console.log(result);
-      res.redirect('/cart');
-    })
+      res.redirect("/cart");
+    });
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {
@@ -77,27 +79,71 @@ exports.postCartDeleteProduct = (req, res, next) => {
   req.user
     .removeFromCart(prodId)
     .then(result => {
-      res.redirect('/cart');
+      res.redirect("/cart");
     })
     .catch(err => console.log(err));
 };
 
 exports.postOrder = (req, res, next) => {
   req.user
-    .addOrder()
-    .then(() => {
-      res.redirect('/orders');
+    .populate("cart.items.productId")
+    .execPopulate()
+    .then(user => {
+      const order = new Order({
+        products: user.cart.items.map(i => {
+          return { quantity: i.quantity, product: i.productId };
+        }),
+        user: {
+          name: req.user.name,
+          userId: req.user._id
+        }
+      });
+
+      return order.save();
     })
-    .catch(err => console.log(err));
+    .then(result => {
+      res.redirect("/orders");
+    });
+
+  //   return this.getCart().then(products => {
+  //     const order = {
+  //       items: products,
+  //       user: {
+  //         _id: new mongodb.ObjectId(this._id),
+  //         name: this.name,
+  //         email: this.email
+  //       }
+  //     };
+
+  //     return db
+  //       .collection('orders')
+  //       .insertOne(order)
+  //       .then(result => {
+  //         this.cart = { items: [] };
+  //         db.collection('users').updateOne(
+  //           { _id: new mongodb.ObjectId(this._id) },
+  //           {
+  //             $set: { cart: { items: [] } }
+  //           }
+  //         );
+  //       });
+  //   });
+
+  //   req.user
+  //     .addOrder()
+  //     .then(() => {
+  //       res.redirect('/orders');
+  //     })
+  //     .catch(err => console.log(err));
 };
 
 exports.getOrders = (req, res, next) => {
   req.user
     .getOrders()
     .then(orders => {
-      res.render('shop/orders', {
-        path: '/orders',
-        pageTitle: 'Your Orders',
+      res.render("shop/orders", {
+        path: "/orders",
+        pageTitle: "Your Orders",
         orders
       });
     })
@@ -105,5 +151,5 @@ exports.getOrders = (req, res, next) => {
 };
 
 exports.getCheckout = (req, res, next) => {
-  res.render('shop/checkout', { path: '/checkout', pageTitle: 'Checkout' });
+  res.render("shop/checkout", { path: "/checkout", pageTitle: "Checkout" });
 };

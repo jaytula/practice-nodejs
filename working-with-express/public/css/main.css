@@ -42,7 +42,9 @@ form {
 
 .main-header__nav {
   height: 100%;
-  display: none;
+  width: 100%;
+  justify-content: space-between;
+  display: flex;
   align-items: center;
 }
 

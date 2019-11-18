@@ -62,23 +62,6 @@ mongoose
     useUnifiedTopology: true
   })
   .then(result => {
-    return User.findOne({ email: 'jay@test.com' });
-  })
-  .then(user => {
-    if (!user) {
-      const user = new User({
-        name: 'Jay',
-        email: 'jay@test.com',
-        cart: {
-          items: []
-        }
-      });
-
-      return user.save();
-    }
-    return null;
-  })
-  .then(result => {
     app.listen(PORT, () => {
       console.log(`Listening on ${PORT}`);
     });

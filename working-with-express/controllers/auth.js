@@ -13,7 +13,7 @@ exports.postLogin = (req, res) => {
     .then(user => {
       req.session.isLoggedIn = true;
       req.session.user = user;
-      req.session.save((err) => {
+      req.session.save(err => {
         res.redirect('/');
       });
     })
@@ -32,8 +32,28 @@ exports.getSignup = (req, res) => {
     path: '/signup',
     pageTitle: 'Sign Up',
     isAuthenticated: req.session.user
-  })
-}
+  });
+};
 exports.postSignup = (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const confirmPassword = req.body.confirmPassword;
 
-}
+  User.findOne({ email: email })
+    .then(userDoc => {
+      if (userDoc) {
+        return res.redirect('/signup');
+      }
+
+      const user = new User({
+        email: email,
+        password: password,
+        cart: { items: [] }
+      });
+
+      return user.save().then(err => {
+        res.redirect('/login');
+      });
+    })
+    .catch(err => console.log(err));
+};

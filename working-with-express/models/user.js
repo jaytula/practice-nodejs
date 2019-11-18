@@ -23,7 +23,7 @@ const userSchema = new Schema({
 userSchema.methods.addToCart = function(product) {
   const cartProductIndex = this.cart.items.findIndex(cp => {
     return cp.productId.equals(product._id);
-  });s
+  });
 
   const updatedCartItems = [...this.cart.items];
 

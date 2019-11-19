@@ -4,7 +4,8 @@ const bcrypt = require('bcryptjs');
 exports.getLogin = (req, res) => {
   res.render('auth/login', {
     path: '/login',
-    pageTitle: 'Login'
+    pageTitle: 'Login',
+    messages: req.flash('error')
   });
 };
 
@@ -15,6 +16,7 @@ exports.postLogin = (req, res) => {
   User.findOne({ email: email })
     .then(user => {
       if (!user) {
+        req.flash('error', 'Invalid email')
         return res.redirect('/login');
       }
       bcrypt.compare(password, user.password).then(doMatch => {
@@ -25,6 +27,7 @@ exports.postLogin = (req, res) => {
             res.redirect('/');
           });
         }
+        req.flash('error', 'Invalid Password')
         res.redirect('/login');
       });
     })

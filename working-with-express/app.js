@@ -37,6 +37,7 @@ app.use(
     store: store
   })
 );
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(csrfProtection);
 
 app.use((req, res, next) => {
@@ -51,7 +52,6 @@ app.use((req, res, next) => {
     .catch(err => console.log(err));
 });
 
-app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);

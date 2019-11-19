@@ -44,10 +44,14 @@ exports.postLogout = (req, res) => {
 };
 
 exports.getSignup = (req, res) => {
+  let message = req.flash('error');
+  message = message.length ? message[0] : null;
+
   res.render('auth/signup', {
     path: '/signup',
     pageTitle: 'Sign Up',
-    isAuthenticated: req.session.user
+    isAuthenticated: req.session.user,
+    errorMessage: message
   });
 };
 exports.postSignup = (req, res) => {
@@ -58,6 +62,7 @@ exports.postSignup = (req, res) => {
   User.findOne({ email: email })
     .then(userDoc => {
       if (userDoc) {
+        req.flash('error', 'Email already signed up')
         return res.redirect('/signup');
       }
 

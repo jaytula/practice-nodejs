@@ -42,8 +42,7 @@ exports.getIndex = (req, res, next) => {
         pageTitle: 'Shop',
         path: '/',
         prods: products,
-        isAuthenticated: req.session.isLoggedIn,
-        csrfToken: req.csrfToken()
+
       });
     })
     .catch(err => {

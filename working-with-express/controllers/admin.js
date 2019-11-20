@@ -51,16 +51,19 @@ exports.postEditProduct = (req, res, next) => {
 
   Product.findById(prodId)
     .then(product => {
+      if (!product.userId.equals(req.user._id)) {
+        return res.redirect('/');
+      }
       product.title = updatedTitle;
       product.price = updatedPrice;
       product.description = updatedDesc;
       product.imageUrl = updatedImageUrl;
 
-      return product.save();
+      return product.save().then(() => {
+        res.redirect('/admin/products');
+      });
     })
-    .then(() => {
-      res.redirect('/admin/products');
-    })
+
     .catch(err => console.log(err));
 };
 
@@ -68,20 +71,17 @@ exports.postDeleteProduct = (req, res, next) => {
   const { productId } = req.body;
 
   //Product.deleteOne({_id: new mongoose.Types.ObjectId(productId)})
-  Product.findByIdAndDelete(productId)
+  Product.deleteOne({ _id: productId, userId: req.user._id })
     .then(result => {
-      console.log('DESTROYED PRODUCT');
-      return result;
-      // Cart.deleteProduct(productId, () => {
-      //   res.redirect('/admin/products');
-      // });
+      console.log('product destroyed');
+      res.redirect('/admin/products');
     })
-    .then(() => res.redirect('/admin/products'))
     .catch(err => console.log(err));
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.find({userId: req.user._id})
+  //Product.find({ userId: req.user._id })
+  Product.find()
     //.select('title price -_id')
     //.populate('userId')
     .then(products => {

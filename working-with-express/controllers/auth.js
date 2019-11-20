@@ -70,31 +70,25 @@ exports.postReset = (req, res) => {
           req.flash('error', 'Invalid email');
           return res.redirect('/reset');
         }
-  
+
         user.resetToken = token;
-        user.resetTokenExpiration = Date.now() + 60*60*1000;
-        return user.save();
-        // TODO: Store reset token for user
-        // TODO: Send email with token
-  
-      }).then(result => {
-        res.redirect('/');
-        transporter.sendMail({
-          to: req.body.email,
-          from: 'test@example.com',
-          subject: 'Password Reset',
-          html: `
-          <p>You requested a password reset</p>
-          <p>Click this <a href="http://localhost:3001/reset/${token}">link</a> to set a new password</p>
-          `
+        user.resetTokenExpiration = Date.now() + 60 * 60 * 1000;
+        return user.save().then(result => {
+          res.redirect('/');
+          transporter.sendMail({
+            to: req.body.email,
+            from: 'test@example.com',
+            subject: 'Password Reset',
+            html: `
+            <p>You requested a password reset</p>
+            <p>Click this <a href="http://localhost:3001/reset/${token}">link</a> to set a new password</p>
+            `
+          });
         });
       })
       .catch(err => console.log(err));
-  
-  })
+  });
 };
-
- 
 
 exports.postLogout = (req, res) => {
   req.session.destroy(err => {

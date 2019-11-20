@@ -7,7 +7,7 @@ const options = {
   auth: {
     api_key: process.env.SENDGRID_KEY
   }
-}
+};
 
 const mailer = nodemailer.createTransport(sendgridTransport(options));
 
@@ -21,6 +21,16 @@ exports.getLogin = (req, res) => {
   });
 };
 
+exports.getReset = (req, res) => {
+  let message = req.flash('error');
+  message = message.length ? message[0] : null;
+  res.render('auth/reset', {
+    path: '/reset',
+    pageTitle: 'Password Reset',
+    errorMessage: message
+  });
+};
+
 exports.postLogin = (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -28,7 +38,7 @@ exports.postLogin = (req, res) => {
   User.findOne({ email: email })
     .then(user => {
       if (!user) {
-        req.flash('error', 'Invalid email')
+        req.flash('error', 'Invalid email');
         return res.redirect('/login');
       }
       bcrypt.compare(password, user.password).then(doMatch => {
@@ -39,9 +49,27 @@ exports.postLogin = (req, res) => {
             res.redirect('/');
           });
         }
-        req.flash('error', 'Invalid Password')
+        req.flash('error', 'Invalid Password');
         res.redirect('/login');
       });
+    })
+    .catch(err => console.log(err));
+};
+
+exports.postReset = (req, res) => {
+  const email = req.body.email;
+  User.findOne({ email: email })
+    .then(user => {
+      if (!user) {
+        req.flash('error', 'Invalid email');
+        return res.redirect('/reset');
+      }
+
+      // TODO: Store reset token for user
+      // TODO: Send email with token
+
+      req.flash('error', 'Invalid Password');
+      res.redirect('/');
     })
     .catch(err => console.log(err));
 };
@@ -72,7 +100,7 @@ exports.postSignup = (req, res) => {
   User.findOne({ email: email })
     .then(userDoc => {
       if (userDoc) {
-        req.flash('error', 'Email already signed up')
+        req.flash('error', 'Email already signed up');
         return res.redirect('/signup');
       }
 
@@ -90,12 +118,12 @@ exports.postSignup = (req, res) => {
             subject: 'Signup succeeded!',
             text: 'Awesome sauce',
             html: '<b>Awesome pickle</b>'
-          }
+          };
 
           mailer.sendMail(emailObject, (err, res) => {
-            if(err) console.log(err)
+            if (err) console.log(err);
             console.log(res);
-          })
+          });
           res.redirect('/login');
         });
       });

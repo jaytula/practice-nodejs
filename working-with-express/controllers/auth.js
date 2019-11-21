@@ -116,7 +116,7 @@ exports.postSignup = (req, res) => {
 
   const errors = validationResult(req);
 
-  if(!errors.isEmpty()) {
+  if (!errors.isEmpty()) {
     console.log(errors);
     return res.status(422).render('auth/signup', {
       path: '/signup',
@@ -124,41 +124,33 @@ exports.postSignup = (req, res) => {
       isAuthenticated: req.session.user,
       errorMessage: errors.array()[0].msg
     });
-
   }
 
-  User.findOne({ email: email })
-    .then(userDoc => {
-      if (userDoc) {
-        req.flash('error', 'Email already signed up');
-        return res.redirect('/signup');
-      }
+   bcrypt
+    .hash(password, 12)
+    .then(hashedPassword => {
+      const user = new User({
+        email: email,
+        password: hashedPassword,
+        cart: { items: [] }
+      });
 
-      return bcrypt.hash(password, 12).then(hashedPassword => {
-        const user = new User({
-          email: email,
-          password: hashedPassword,
-          cart: { items: [] }
+      return user.save().then(err => {
+        const emailObject = {
+          to: [email],
+          from: 'test@example.com',
+          subject: 'Signup succeeded!',
+          text: 'Awesome sauce',
+          html: '<b>Awesome pickle</b>'
+        };
+
+        transporter.sendMail(emailObject, (err, res) => {
+          if (err) console.log(err);
+          console.log(res);
         });
-
-        return user.save().then(err => {
-          const emailObject = {
-            to: [email],
-            from: 'test@example.com',
-            subject: 'Signup succeeded!',
-            text: 'Awesome sauce',
-            html: '<b>Awesome pickle</b>'
-          };
-
-          transporter.sendMail(emailObject, (err, res) => {
-            if (err) console.log(err);
-            console.log(res);
-          });
-          res.redirect('/login');
-        });
+        res.redirect('/login');
       });
     })
-    .catch(err => console.log(err));
 };
 
 exports.getNewPassword = (req, res) => {
@@ -192,9 +184,10 @@ exports.postNewPassword = (req, res) => {
   })
     .then(user => {
       return bcrypt.hash(newPassword, 12).then(hashedPassword => {
-        return {user, hashedPassword};
-      })
-    }).then(({user, hashedPassword}) => {
+        return { user, hashedPassword };
+      });
+    })
+    .then(({ user, hashedPassword }) => {
       user.password = hashedPassword;
       user.resetToken = undefined;
       user.resetTokenExpiration = undefined;

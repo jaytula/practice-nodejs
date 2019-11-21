@@ -122,7 +122,7 @@ exports.postSignup = (req, res) => {
       path: '/signup',
       pageTitle: 'Sign Up',
       isAuthenticated: req.session.user,
-      errorMessage: errors.array()
+      errorMessage: errors.array()[0].msg
     });
 
   }

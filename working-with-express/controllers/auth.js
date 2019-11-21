@@ -34,13 +34,23 @@ exports.getReset = (req, res) => {
 };
 
 exports.postLogin = (req, res) => {
+  const errors = validationResult(req);
+
+  if(!errors.isEmpty()) {
+    return res.render('auth/login', {
+      path: '/login',
+      pageTitle: 'Login',
+      errorMessage: errors.array()[0].msg
+    });
+  }
+
   const email = req.body.email;
   const password = req.body.password;
   let user;
   User.findOne({ email: email })
     .then(user => {
       if (!user) {
-        req.flash('error', 'Invalid email');
+        req.flash('error', 'Invalid email!');
         return res.redirect('/login');
       }
       bcrypt.compare(password, user.password).then(doMatch => {

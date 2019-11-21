@@ -8,7 +8,16 @@ const User = require('../models/user');
 
 router.get('/login', authController.getLogin);
 router.get('/reset', authController.getReset);
-router.post('/login', authController.postLogin);
+router.post(
+  '/login',
+  [
+    body('email')
+      .isEmail()
+      .withMessage('Please enter a valid email'),
+    body('password', 'Password has to be valid').isLength({ min: 5 }).isAlphanumeric()
+  ],
+  authController.postLogin
+);
 router.post('/reset', authController.postReset);
 router.get('/signup', authController.getSignup);
 router.post(
@@ -24,7 +33,9 @@ router.post(
         // return true;
         return User.findOne({ email: value }).then(userDoc => {
           if (userDoc) {
-            return Promise.reject('E-Mail exists already, please pick a different one')
+            return Promise.reject(
+              'E-Mail exists already, please pick a different one'
+            );
           }
         });
       }),

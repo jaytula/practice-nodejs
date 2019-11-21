@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport');
+const { validationResult } = require('express-validator');
 
 const options = {
   auth: {
@@ -112,6 +113,19 @@ exports.postSignup = (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const confirmPassword = req.body.confirmPassword;
+
+  const errors = validationResult(req);
+
+  if(!errors.isEmpty()) {
+    console.log(errors);
+    return res.status(422).render('auth/signup', {
+      path: '/signup',
+      pageTitle: 'Sign Up',
+      isAuthenticated: req.session.user,
+      errorMessage: errors.array()
+    });
+
+  }
 
   User.findOne({ email: email })
     .then(userDoc => {

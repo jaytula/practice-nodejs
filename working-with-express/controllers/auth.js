@@ -19,7 +19,8 @@ exports.getLogin = (req, res) => {
   res.render('auth/login', {
     path: '/login',
     pageTitle: 'Login',
-    errorMessage: message
+    errorMessage: message,
+    validationErrors: []
   });
 };
 
@@ -33,25 +34,45 @@ exports.getReset = (req, res) => {
   });
 };
 
-exports.postLogin = (req, res) => {
-  const errors = validationResult(req);
-
-  if(!errors.isEmpty()) {
-    return res.status(422).render('auth/login', {
+const renderLogin = (res, status = 200, localsOverride = {}) => {
+  const errorMessage =
+    localsOverride.validationErrors && localsOverride.validationErrors.length
+      ? localsOverride.validationErrors[0].msg
+      : '';
+  const locals = Object.assign(
+    {
       path: '/login',
       pageTitle: 'Login',
-      errorMessage: errors.array()[0].msg
+      oldInput: { email: '', password: '' },
+      errorMessage,
+      validationErrors: []
+    },
+    localsOverride
+  );
+
+  return res.status(status).render('auth/login', locals);
+};
+
+exports.postLogin = (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const errors = validationResult(req);
+  const validationErrors = errors.array();
+
+  if (!errors.isEmpty()) {
+    return renderLogin(res, 422, {
+      oldInput: { email: email, password: password },
+      validationErrors
     });
   }
 
-  const email = req.body.email;
-  const password = req.body.password;
-  let user;
   User.findOne({ email: email })
     .then(user => {
       if (!user) {
-        req.flash('error', 'Invalid email!');
-        return res.redirect('/login');
+        return renderLogin(res, 422, {
+          oldInput: { email: email, password: password },
+          validationErrors: [{ param: 'email', msg: 'Invalid Email' }]
+        });
       }
       bcrypt.compare(password, user.password).then(doMatch => {
         if (doMatch) {
@@ -61,8 +82,10 @@ exports.postLogin = (req, res) => {
             res.redirect('/');
           });
         }
-        req.flash('error', 'Invalid Password');
-        res.redirect('/login');
+        return renderLogin(res, 422, {
+          oldInput: { email: email, password: password },
+          validationErrors: [{ param: 'email', msg: 'Invalid Password' }]
+        });
       });
     })
     .catch(err => console.log(err));
@@ -117,7 +140,7 @@ exports.getSignup = (req, res) => {
     pageTitle: 'Sign Up',
     isAuthenticated: req.session.user,
     errorMessage: message,
-    oldInput: {email: "", password: "", confirmPassword: ""},
+    oldInput: { email: '', password: '', confirmPassword: '' },
     validationErrors: []
   });
 };
@@ -136,36 +159,38 @@ exports.postSignup = (req, res) => {
       pageTitle: 'Sign Up',
       isAuthenticated: req.session.user,
       errorMessage: validationErrors[0].msg,
-      oldInput: { email: email, password: password, confirmPassword: confirmPassword},
+      oldInput: {
+        email: email,
+        password: password,
+        confirmPassword: confirmPassword
+      },
       validationErrors
     });
   }
 
-   bcrypt
-    .hash(password, 12)
-    .then(hashedPassword => {
-      const user = new User({
-        email: email,
-        password: hashedPassword,
-        cart: { items: [] }
-      });
+  bcrypt.hash(password, 12).then(hashedPassword => {
+    const user = new User({
+      email: email,
+      password: hashedPassword,
+      cart: { items: [] }
+    });
 
-      return user.save().then(err => {
-        const emailObject = {
-          to: [email],
-          from: 'test@example.com',
-          subject: 'Signup succeeded!',
-          text: 'Awesome sauce',
-          html: '<b>Awesome pickle</b>'
-        };
+    return user.save().then(err => {
+      const emailObject = {
+        to: [email],
+        from: 'test@example.com',
+        subject: 'Signup succeeded!',
+        text: 'Awesome sauce',
+        html: '<b>Awesome pickle</b>'
+      };
 
-        transporter.sendMail(emailObject, (err, res) => {
-          if (err) console.log(err);
-          console.log(res);
-        });
-        res.redirect('/login');
+      transporter.sendMail(emailObject, (err, res) => {
+        if (err) console.log(err);
+        console.log(res);
       });
-    })
+      res.redirect('/login');
+    });
+  });
 };
 
 exports.getNewPassword = (req, res) => {

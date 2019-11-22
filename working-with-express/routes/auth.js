@@ -6,7 +6,11 @@ const router = express.Router();
 const authController = require('../controllers/auth');
 const User = require('../models/user');
 
-router.get('/login', authController.getLogin);
+router.get(
+  '/login',
+  [body('email').isEmail(), body('password').isLength({ min: 5 })],
+  authController.getLogin
+);
 router.get('/reset', authController.getReset);
 router.post(
   '/login',
@@ -14,7 +18,9 @@ router.post(
     body('email')
       .isEmail()
       .withMessage('Please enter a valid email'),
-    body('password', 'Password has to be valid').isLength({ min: 5 }).isAlphanumeric()
+    body('password', 'Password has to be valid')
+      .isLength({ min: 5 })
+      .isAlphanumeric()
   ],
   authController.postLogin
 );

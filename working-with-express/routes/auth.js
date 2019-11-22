@@ -8,7 +8,14 @@ const User = require('../models/user');
 
 router.get(
   '/login',
-  [body('email').isEmail(), body('password').isLength({ min: 5 })],
+  [
+    body('email')
+      .isEmail()
+      .normalizeEmail(),
+    body('password')
+      .isLength({ min: 5 })
+      .trim()
+  ],
   authController.getLogin
 );
 router.get('/reset', authController.getReset);
@@ -43,15 +50,15 @@ router.post(
               'E-Mail exists already, please pick a different one'
             );
           }
-        });
-      }),
+        })
+      }).normalizeEmail(),
     body(
       'password',
       'Please enter a password with only numbers and text and at least 5 characters'
     )
       .isLength({ min: 5 })
-      .isAlphanumeric(),
-    body('confirmPassword').custom((value, { req }) => {
+      .isAlphanumeric().trim(),
+    body('confirmPassword').trim().custom((value, { req }) => {
       if (value !== req.body.password) {
         throw new Error('Passwords have to match');
       }

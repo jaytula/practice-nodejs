@@ -13,7 +13,28 @@ const options = {
 
 const transporter = nodemailer.createTransport(sendgridTransport(options));
 
+const renderLogin = (res, status = 200, localsOverride = {}) => {
+  const errorMessage =
+    localsOverride.validationErrors && localsOverride.validationErrors.length
+      ? localsOverride.validationErrors[0].msg
+      : '';
+  const locals = Object.assign(
+    {
+      path: '/login',
+      pageTitle: 'Login',
+      oldInput: { email: '', password: '' },
+      errorMessage,
+      validationErrors: []
+    },
+    localsOverride
+  );
+
+  return res.status(status).render('auth/login', locals);
+};
+
 exports.getLogin = (req, res) => {
+  return renderLogin(res, 200);
+  
   let message = req.flash('error');
   message = message.length ? message[0] : null;
   res.render('auth/login', {
@@ -32,25 +53,6 @@ exports.getReset = (req, res) => {
     pageTitle: 'Password Reset',
     errorMessage: message
   });
-};
-
-const renderLogin = (res, status = 200, localsOverride = {}) => {
-  const errorMessage =
-    localsOverride.validationErrors && localsOverride.validationErrors.length
-      ? localsOverride.validationErrors[0].msg
-      : '';
-  const locals = Object.assign(
-    {
-      path: '/login',
-      pageTitle: 'Login',
-      oldInput: { email: '', password: '' },
-      errorMessage,
-      validationErrors: []
-    },
-    localsOverride
-  );
-
-  return res.status(status).render('auth/login', locals);
 };
 
 exports.postLogin = (req, res) => {

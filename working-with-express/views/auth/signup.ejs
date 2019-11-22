@@ -19,6 +19,7 @@
         <div class="form-control">
           <label for="email">E-Mail</label>
           <input
+            class="<%= validationErrors.some(e => e.param=='email') ? 'invalid' : '' %>"
             type="email"
             name="email"
             id="email"
@@ -28,6 +29,7 @@
         <div class="form-control">
           <label for="password">Password</label>
           <input
+            class="<%= validationErrors.some(e => e.param=='password') ? 'invalid' : '' %>"
             type="password"
             id="password"
             name="password"
@@ -37,6 +39,7 @@
         <div class="form-control">
           <label for="confirmPassword">Confirm Password</label>
           <input
+            class="<%= validationErrors.some(e => e.param=='confirmPassword') ? 'invalid' : '' %>"
             type="password"
             id="confirmPassword"
             name="confirmPassword"

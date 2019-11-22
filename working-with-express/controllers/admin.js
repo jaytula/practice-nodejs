@@ -1,12 +1,31 @@
 const mongoose = require('mongoose');
 const Product = require('../models/product');
+const { validationResult } = require('express-validator');
+
+const renderEditProduct = (res, status = 200, localsOverride = {}) => {
+  const errorMessage =
+    localsOverride.validationErrors && localsOverride.validationErrors.length
+      ? localsOverride.validationErrors[0].msg
+      : '';
+  const locals = Object.assign(
+    {
+      pageTitle: 'Add Product',
+      path: '/admin/add-product',
+      editing: false,
+      product: { title: '', imageUrl: '', price: '', description: '' },
+      errorMessage,
+      validationErrors: [],
+      hasError: false
+    },
+    localsOverride
+  );
+
+  console.log(locals);
+  res.status(status).render('admin/edit-product', locals);
+};
 
 exports.getAddProduct = (req, res, next) => {
-  res.render('admin/edit-product', {
-    pageTitle: 'Add Product',
-    path: '/admin/add-product',
-    editing: false
-  });
+  renderEditProduct(res);
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -21,7 +40,8 @@ exports.getEditProduct = (req, res, next) => {
         path: '/admin/edit-product',
         editing: editMode,
         product: product,
-        isAuthenticated: req.user
+        isAuthenticated: req.user,
+        hasError: false
       });
     })
     .catch(err => console.log(err));
@@ -29,6 +49,16 @@ exports.getEditProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const { title, imageUrl, price, description } = req.body;
+
+  const errors = validationResult(req);
+  const validationErrors = errors.array();
+  if (!errors.isEmpty()) {
+    return renderEditProduct(res, 422, {
+      product: { title, imageUrl, price, description },
+      validationErrors,
+      hasError: true
+    });
+  }
 
   const product = new Product({
     title,

@@ -34,15 +34,6 @@ const renderLogin = (res, status = 200, localsOverride = {}) => {
 
 exports.getLogin = (req, res) => {
   return renderLogin(res, 200);
-  
-  let message = req.flash('error');
-  message = message.length ? message[0] : null;
-  res.render('auth/login', {
-    path: '/login',
-    pageTitle: 'Login',
-    errorMessage: message,
-    validationErrors: []
-  });
 };
 
 exports.getReset = (req, res) => {

@@ -11,7 +11,7 @@ router.get(
   [
     body('email')
       .isEmail()
-      .normalizeEmail(),
+      .normalizeEmail({gmail_remove_subaddress: false}),
     body('password')
       .isLength({ min: 5 })
       .trim()
@@ -47,7 +47,7 @@ router.post(
             );
           }
         })
-      }).normalizeEmail(),
+      }).normalizeEmail({gmail_remove_subaddress: false}),
     body(
       'password',
       'Please enter a password with only numbers and text and at least 5 characters'

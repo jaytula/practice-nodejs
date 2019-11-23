@@ -7,11 +7,12 @@ const renderEditProduct = (res, status = 200, localsOverride = {}) => {
     localsOverride.validationErrors && localsOverride.validationErrors.length
       ? localsOverride.validationErrors[0].msg
       : '';
+  const editing = !!localsOverride.editing;
   const locals = Object.assign(
     {
-      pageTitle: 'Add Product',
-      path: '/admin/add-product',
-      editing: false,
+      pageTitle: editing ? 'Edit Product' : 'Add Product',
+      path: editing ? '/admin/edit-product' : '/admin/add-product',
+      editing,
       product: { title: '', imageUrl: '', price: '', description: '' },
       errorMessage,
       validationErrors: [],
@@ -34,14 +35,7 @@ exports.getEditProduct = (req, res, next) => {
   }
   Product.findById(req.params.productId)
     .then(product => {
-      res.render('admin/edit-product', {
-        pageTitle: 'Edit Product',
-        path: '/admin/edit-product',
-        editing: editMode,
-        product: product,
-        isAuthenticated: req.user,
-        hasError: false
-      });
+      renderEditProduct(res, 200, { editing: true, product });
     })
     .catch(err => console.log(err));
 };
@@ -81,9 +75,27 @@ exports.postEditProduct = (req, res, next) => {
   const errors = validationResult(req);
   const validationErrors = errors.array();
 
+  if (!errors.isEmpty()) {
+    return renderEditProduct(res, 422, {
+      editing: true,
+      product: {
+        _id: prodId,
+        title: updatedTitle,
+        price: updatedPrice,
+        imageUrl: updatedImageUrl,
+        description: updatedDesc
+      },
+      hasError: true,
+      validationErrors
+    });
+  }
+
   Product.findById(prodId)
     .then(product => {
       if (!product.userId.equals(req.user._id)) {
+        console.log('Wrong User');
+        console.log(product);
+        console.log(req.user);
         return res.redirect('/');
       }
       product.title = updatedTitle;
@@ -112,8 +124,8 @@ exports.postDeleteProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  //Product.find({ userId: req.user._id })
-  Product.find()
+  Product.find({ userId: req.user._id })
+    //Product.find()
     //.select('title price -_id')
     //.populate('userId')
     .then(products => {

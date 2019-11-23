@@ -20,7 +20,6 @@ const renderEditProduct = (res, status = 200, localsOverride = {}) => {
     localsOverride
   );
 
-  console.log(locals);
   res.status(status).render('admin/edit-product', locals);
 };
 
@@ -78,6 +77,9 @@ exports.postEditProduct = (req, res, next) => {
   updatedPrice = req.body.price;
   updatedImageUrl = req.body.imageUrl;
   updatedDesc = req.body.description;
+
+  const errors = validationResult(req);
+  const validationErrors = errors.array();
 
   Product.findById(prodId)
     .then(product => {

@@ -54,6 +54,7 @@ exports.postAddProduct = (req, res, next) => {
   }
 
   const product = new Product({
+    _id: new mongoose.Types.ObjectId('5dd8461de64a3b1d7d3c8182'),
     title,
     price,
     imageUrl,
@@ -62,7 +63,11 @@ exports.postAddProduct = (req, res, next) => {
   });
   product.save().then(result => {
     res.redirect('/admin/products');
-  });
+  }).catch(err => {
+    console.log('An error occurred');
+    console.log(err);
+    res.redirect('/500');
+  })
 };
 
 exports.postEditProduct = (req, res, next) => {

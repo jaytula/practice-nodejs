@@ -81,7 +81,11 @@ exports.postLogin = (req, res) => {
         });
       });
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
 exports.postReset = (req, res) => {
@@ -113,7 +117,11 @@ exports.postReset = (req, res) => {
           });
         });
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        next(error);
+      });
   });
 };
 
@@ -202,7 +210,11 @@ exports.getNewPassword = (req, res) => {
         passwordToken: token
       });
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
 exports.postNewPassword = (req, res) => {
@@ -229,5 +241,9 @@ exports.postNewPassword = (req, res) => {
     .then(result => {
       res.redirect('/login');
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };

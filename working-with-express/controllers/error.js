@@ -8,6 +8,7 @@ exports.get404 = (req, res) => {
 exports.get500 = (req, res) => {
   res.status(500).render('500', {
     pageTitle: 'Not Found',
-    path: null
+    path: null,
+    isAuthenticated: req.session.isAuthenticated
   });
 };

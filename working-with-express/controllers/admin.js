@@ -37,7 +37,11 @@ exports.getEditProduct = (req, res, next) => {
     .then(product => {
       renderEditProduct(res, 200, { editing: true, product });
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
 exports.postAddProduct = (req, res, next) => {
@@ -64,9 +68,9 @@ exports.postAddProduct = (req, res, next) => {
   product.save().then(result => {
     res.redirect('/admin/products');
   }).catch(err => {
-    console.log('An error occurred');
-    console.log(err);
-    res.redirect('/500');
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    next(error);
   })
 };
 

@@ -151,24 +151,35 @@ exports.getCheckout = (req, res, next) => {
 
 exports.getInvoice = (req, res, next) => {
   const { orderId } = req.params;
-  const invoiceName = `invoice-${orderId}.pdf`
-  const invoicePath = path.join('data', 'invoices', invoiceName)
 
+  Order.findById(orderId).then(order => {
+    if(!order) {
+      throw new Error('No order found');
+    }
+    if (!order.user.userId.equals(req.user._id)) {
+      const error = new Error('Unauthorized');
+      error.httpStatusCode = 401;
+      throw error;
+    }
 
-  fs.readFile(invoicePath, (err, data) => {
-    console.log(err);
-    if(err) return next(err);
+    const invoiceName = `invoice-${orderId}.pdf`;
+    const invoicePath = path.join('data', 'invoices', invoiceName);
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${invoiceName}"`);
-    res.send(data);
-  })
-//   fs.access(filePath, fs.F_OK, err => {
-//     if(err) {
-//       console.log(err);
-//       return next(new Error(err));
-//     }
+    fs.readFile(invoicePath, (err, data) => {
+      console.log(err);
+      if (err) return next(err);
 
-//     res.download(filePath);
-//   })
-}
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${invoiceName}"`);
+      res.send(data);
+    });
+  }).catch(err => next(err))
+  //   fs.access(filePath, fs.F_OK, err => {
+  //     if(err) {
+  //       console.log(err);
+  //       return next(new Error(err));
+  //     }
+
+  //     res.download(filePath);
+  //   })
+};

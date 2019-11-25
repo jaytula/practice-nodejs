@@ -13,6 +13,14 @@ const errorController = require('./controllers/error');
 
 // const User = require('./models/user');
 const csrfProtection = csrf();
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, 'images')
+  },
+  filename: function(req, file, cb) {
+    cb(null, new Date().toISOString() + '-' + file.originalname);
+  }
+})
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -41,7 +49,7 @@ app.use(
 );
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(multer({dest: 'images'}).single('image'));
+app.use(multer({storage: storage}).single('image'));
 app.use(csrfProtection);
 app.use(flash());
 

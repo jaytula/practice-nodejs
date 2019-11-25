@@ -45,7 +45,7 @@ exports.getEditProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-  const { title, imageUrl, price, description } = req.body;
+  const { title, image: imageUrl, price, description } = req.body;
 
   const errors = validationResult(req);
   const validationErrors = errors.array();
@@ -56,6 +56,8 @@ exports.postAddProduct = (req, res, next) => {
       hasError: true
     });
   }
+
+  console.log(imageUrl);
 
   const product = new Product({
     //_id: new mongoose.Types.ObjectId('5dd8461de64a3b1d7d3c8182'),

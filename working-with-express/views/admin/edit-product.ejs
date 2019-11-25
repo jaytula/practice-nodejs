@@ -17,6 +17,7 @@
         class="product-form"
         action="<%= `/admin/${editing ? 'edit' : 'add'}-product` %>"
         method="POST"
+        enctype="multipart/form-data"
       >
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
         <% if(editing) { %>

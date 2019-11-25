@@ -1,6 +1,11 @@
+const fs = require('fs');
+const path = require('path');
+
 const Product = require('../models/product');
 const Order = require('../models/order');
 const User = require('../models/user');
+
+const appDir = path.dirname(require.main.filename);
 
 exports.getProducts = (req, res, next) => {
   Product.find()
@@ -143,3 +148,24 @@ exports.getCheckout = (req, res, next) => {
     pageTitle: 'Checkout'
   });
 };
+
+exports.getInvoice = (req, res, next) => {
+  const { orderId } = req.params;
+  const invoicePath = path.join('data', 'invoices', `invoice-${orderId}.pdf`)
+
+
+  fs.readFile(invoicePath, (err, data) => {
+    console.log(err);
+    if(err) return next(err);
+
+    res.send(data);
+  })
+//   fs.access(filePath, fs.F_OK, err => {
+//     if(err) {
+//       console.log(err);
+//       return next(new Error(err));
+//     }
+
+//     res.download(filePath);
+//   })
+}

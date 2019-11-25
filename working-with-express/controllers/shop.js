@@ -151,13 +151,16 @@ exports.getCheckout = (req, res, next) => {
 
 exports.getInvoice = (req, res, next) => {
   const { orderId } = req.params;
-  const invoicePath = path.join('data', 'invoices', `invoice-${orderId}.pdf`)
+  const invoiceName = `invoice-${orderId}.pdf`
+  const invoicePath = path.join('data', 'invoices', invoiceName)
 
 
   fs.readFile(invoicePath, (err, data) => {
     console.log(err);
     if(err) return next(err);
 
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${invoiceName}"`);
     res.send(data);
   })
 //   fs.access(filePath, fs.F_OK, err => {

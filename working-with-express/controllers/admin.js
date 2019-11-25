@@ -45,7 +45,8 @@ exports.getEditProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-  const { title, image: imageUrl, price, description } = req.body;
+  const { title, price, description } = req.body;
+  const imageUrl = req.file;
 
   const errors = validationResult(req);
   const validationErrors = errors.array();

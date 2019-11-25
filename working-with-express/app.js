@@ -22,6 +22,10 @@ const storage = multer.diskStorage({
   }
 })
 
+const fileFilter = (req, file, cb) => {
+  cb(null, file.mimetype==='image/png' || file.mimetype==='image/jpg' || file.mimetype ==='image/jpeg');
+}
+
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
@@ -49,7 +53,7 @@ app.use(
 );
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(multer({storage: storage}).single('image'));
+app.use(multer({storage: storage, fileFilter}).single('image'));
 app.use(csrfProtection);
 app.use(flash());
 

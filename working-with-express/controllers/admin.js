@@ -66,13 +66,11 @@ exports.postAddProduct = (req, res, next) => {
   const validationErrors = errors.array();
   if (!errors.isEmpty()) {
     return renderEditProduct(res, 422, {
-      product: { title, imageUrl, price, description },
+      product: { title, price, description },
       validationErrors,
       hasError: true
     });
   }
-
-  
 
   const product = new Product({
     //_id: new mongoose.Types.ObjectId('5dd8461de64a3b1d7d3c8182'),

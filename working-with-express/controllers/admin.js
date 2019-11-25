@@ -46,7 +46,21 @@ exports.getEditProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const { title, price, description } = req.body;
-  const imageUrl = req.file;
+  const image = req.file;
+
+  if (!image) {
+    return renderEditProduct(res, 422, {
+      validationErrors: [
+        { param: 'image', msg: 'Attached File is not an image' }
+      ],
+      product: {
+        title, price, description
+      },
+      hasError: true
+    });
+  }
+
+  const imageUrl = image.path;
 
   const errors = validationResult(req);
   const validationErrors = errors.array();
@@ -58,7 +72,7 @@ exports.postAddProduct = (req, res, next) => {
     });
   }
 
-  console.log(imageUrl);
+  
 
   const product = new Product({
     //_id: new mongoose.Types.ObjectId('5dd8461de64a3b1d7d3c8182'),
@@ -68,35 +82,39 @@ exports.postAddProduct = (req, res, next) => {
     description,
     userId: req.user
   });
-  product.save().then(result => {
-    res.redirect('/admin/products');
-  }).catch(err => {
-    const error = new Error(err);
-    error.httpStatusCode = 500;
-    next(error);
-  })
+  product
+    .save()
+    .then(result => {
+      res.redirect('/admin/products');
+    })
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
 exports.postEditProduct = (req, res, next) => {
-  prodId = req.body.productId;
-  updatedTitle = req.body.title;
-  updatedPrice = req.body.price;
-  updatedImageUrl = req.body.imageUrl;
-  updatedDesc = req.body.description;
+  const prodId = req.body.productId;
+  const updatedTitle = req.body.title;
+  const updatedPrice = req.body.price;
+  const image = req.file;
+  const updatedDesc = req.body.description;
 
   const errors = validationResult(req);
   const validationErrors = errors.array();
 
   if (!errors.isEmpty()) {
+    const product = {
+      _id: prodId,
+      title: updatedTitle,
+      price: updatedPrice,
+      description: updatedDesc
+    }
+    
     return renderEditProduct(res, 422, {
       editing: true,
-      product: {
-        _id: prodId,
-        title: updatedTitle,
-        price: updatedPrice,
-        imageUrl: updatedImageUrl,
-        description: updatedDesc
-      },
+      product: product,
       hasError: true,
       validationErrors
     });
@@ -113,7 +131,9 @@ exports.postEditProduct = (req, res, next) => {
       product.title = updatedTitle;
       product.price = updatedPrice;
       product.description = updatedDesc;
-      product.imageUrl = updatedImageUrl;
+      if(image) {
+        product.imageUrl = req.file.path;
+      }
 
       return product.save().then(() => {
         res.redirect('/admin/products');

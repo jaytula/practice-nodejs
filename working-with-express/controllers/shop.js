@@ -6,25 +6,9 @@ const Product = require('../models/product');
 const Order = require('../models/order');
 const User = require('../models/user');
 
-const ITEMS_PER_PAGE = 1;
+const ITEMS_PER_PAGE = 2;
 
 const appDir = path.dirname(require.main.filename);
-
-exports.getProducts = (req, res, next) => {
-  Product.find()
-    .then(products => {
-      res.render('shop/product-list', {
-        pageTitle: 'All Products',
-        path: '/products',
-        prods: products
-      });
-    })
-    .catch(err => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      next(error);
-    });
-};
 
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
@@ -43,7 +27,7 @@ exports.getProduct = (req, res, next) => {
     });
 };
 
-exports.getIndex = (req, res, next) => {
+const makeProductListHandler = (templatePath, pageTitle, path) => (req, res, next) => {
   const page = +req.query.page || 1;
   let totalItems;
 
@@ -51,9 +35,9 @@ exports.getIndex = (req, res, next) => {
     totalItems = numProducts;
     return  Product.find().skip((page-1)*ITEMS_PER_PAGE).limit(ITEMS_PER_PAGE)
   }).then(products => {
-      res.render('shop/index', {
-        pageTitle: 'Shop',
-        path: '/',
+      res.render(templatePath, {
+        pageTitle,
+        path,
         prods: products,
         currentPage: page,        
         hasNextPage: ITEMS_PER_PAGE * page < totalItems,
@@ -69,6 +53,9 @@ exports.getIndex = (req, res, next) => {
       next(error);
     });
 };
+
+exports.getIndex = makeProductListHandler('shop/index', 'Shop', '/');
+exports.getProducts = makeProductListHandler('shop/product-list', 'All Products', '/products');
 
 exports.getCart = (req, res, next) => {
   if (!req.user) res.redirect('/login');

@@ -1,5 +1,7 @@
 const fs = require('fs');
 const path = require('path');
+const stripe = require('stripe')(process.env.STRIPE_KEY);
+
 const PDFDocument = require('pdfkit');
 
 const Product = require('../models/product');
@@ -102,18 +104,28 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.getCheckout = (req, res, next) => {
+  let products;
+  let totalSum = 0;
   req.user
   .populate('cart.items.productId')
   .execPopulate()
   .then(user => {
-    const products = user.cart.items;
-    console.log(products);
-    const totalSum = products.reduce((acc, item) => acc+item.quantity*item.productId.price, 0)
+    products = user.cart.items;
+    totalSum = products.reduce((acc, item) => acc+item.quantity*item.productId.price, 0);
+
+    return stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: products.map(p => {
+        return { name: p.productId.title, description: product.productId.description, amount: p.productId.price * 100, currency: 'USD', quantity: p.quanitity };
+      })
+    });
+  }).then((session) => {
     res.render('shop/checkout', {
       path: '/checkout',
       pageTitle: 'Checkout',
       products: products,
-      totalSum: totalSum
+      totalSum: totalSum,
+      sessionId: session.id
     });
   }).catch(err => {
     const error = new Error(err);

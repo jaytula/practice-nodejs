@@ -101,6 +101,27 @@ exports.postCartDeleteProduct = (req, res, next) => {
     });
 };
 
+exports.getCheckout = (req, res, next) => {
+  req.user
+  .populate('cart.items.productId')
+  .execPopulate()
+  .then(user => {
+    const products = user.cart.items;
+    console.log(products);
+    const totalSum = products.reduce((acc, item) => acc+item.quantity*item.productId.price, 0)
+    res.render('shop/checkout', {
+      path: '/checkout',
+      pageTitle: 'Checkout',
+      products: products,
+      totalSum: totalSum
+    });
+  }).catch(err => {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  })
+};
+
 exports.postOrder = (req, res, next) => {
   req.user
     .populate('cart.items.productId')
@@ -143,12 +164,7 @@ exports.getOrders = (req, res, next) => {
     });
 };
 
-exports.getCheckout = (req, res, next) => {
-  res.render('shop/checkout', {
-    path: '/checkout',
-    pageTitle: 'Checkout'
-  });
-};
+
 
 exports.getInvoice = (req, res, next) => {
   const { orderId } = req.params;

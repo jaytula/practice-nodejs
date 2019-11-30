@@ -29,6 +29,7 @@ const fileFilter = (req, file, cb) => {
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
+const utilRoutes = require('./routes/util');
 
 const User = require('./models/user');
 const store = new MongoStore({
@@ -56,6 +57,7 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(multer({storage: storage, fileFilter}).single('image'));
+app.use(bodyParser.raw({type: 'application/json'}), utilRoutes);
 app.use(csrfProtection);
 app.use(flash());
 

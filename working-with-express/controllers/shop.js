@@ -29,19 +29,27 @@ exports.getProduct = (req, res, next) => {
     });
 };
 
-const makeProductListHandler = (templatePath, pageTitle, path) => (req, res, next) => {
+const makeProductListHandler = (templatePath, pageTitle, path) => (
+  req,
+  res,
+  next
+) => {
   const page = +req.query.page || 1;
   let totalItems;
 
-  Product.countDocuments().then(numProducts => {
-    totalItems = numProducts;
-    return  Product.find().skip((page-1)*ITEMS_PER_PAGE).limit(ITEMS_PER_PAGE)
-  }).then(products => {
+  Product.countDocuments()
+    .then(numProducts => {
+      totalItems = numProducts;
+      return Product.find()
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+    })
+    .then(products => {
       res.render(templatePath, {
         pageTitle,
         path,
         prods: products,
-        currentPage: page,        
+        currentPage: page,
         hasNextPage: ITEMS_PER_PAGE * page < totalItems,
         hasPreviousPage: page > 1,
         nextPage: page + 1,
@@ -57,7 +65,11 @@ const makeProductListHandler = (templatePath, pageTitle, path) => (req, res, nex
 };
 
 exports.getIndex = makeProductListHandler('shop/index', 'Shop', '/');
-exports.getProducts = makeProductListHandler('shop/product-list', 'All Products', '/products');
+exports.getProducts = makeProductListHandler(
+  'shop/product-list',
+  'All Products',
+  '/products'
+);
 
 exports.getCart = (req, res, next) => {
   if (!req.user) res.redirect('/login');
@@ -107,34 +119,72 @@ exports.getCheckout = (req, res, next) => {
   let products;
   let totalSum = 0;
   req.user
-  .populate('cart.items.productId')
-  .execPopulate()
-  .then(user => {
-    products = user.cart.items;
-    totalSum = products.reduce((acc, item) => acc+item.quantity*item.productId.price, 0);
+    .populate('cart.items.productId')
+    .execPopulate()
+    .then(user => {
+      products = user.cart.items;
+      totalSum = products.reduce(
+        (acc, item) => acc + item.quantity * item.productId.price,
+        0
+      );
 
-    return stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: products.map(p => {
-        return { name: p.productId.title, description: product.productId.description, amount: p.productId.price * 100, currency: 'USD', quantity: p.quanitity };
-      })
+      return stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: products.map(p => {
+          return {
+            name: p.productId.title,
+            description: p.productId.description,
+            amount: Math.round(p.productId.price * 100),
+            currency: 'usd',
+            quantity: p.quantity
+          };
+        }),
+        success_url: `${req.protocol}://${req.get('host')}/checkout/success`,
+        cancel_url: `${req.protocol}://${req.get('host')}/checkout/cancel`,
+      });
+    })
+    .then(session => {
+      res.render('shop/checkout', {
+        path: '/checkout',
+        pageTitle: 'Checkout',
+        products: products,
+        totalSum: totalSum,
+        sessionId: session.id
+      });
+    })
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
-  }).then((session) => {
-    res.render('shop/checkout', {
-      path: '/checkout',
-      pageTitle: 'Checkout',
-      products: products,
-      totalSum: totalSum,
-      sessionId: session.id
-    });
-  }).catch(err => {
-    const error = new Error(err);
-    error.httpStatusCode = 500;
-    return next(error);
-  })
 };
 
 exports.postOrder = (req, res, next) => {
+  req.user
+    .populate('cart.items.productId')
+    .execPopulate()
+    .then(user => {
+      const order = new Order({
+        products: user.cart.items.map(i => {
+          return { quantity: i.quantity, product: { ...i.productId._doc } };
+        }),
+        user: {
+          email: req.user.email,
+          userId: req.user._id
+        }
+      });
+
+      return order.save();
+    })
+    .then(result => {
+      return req.user.clearCart();
+    })
+    .then(result => {
+      res.redirect('/orders');
+    });
+};
+
+exports.getCheckoutSuccess = (req, res, next) => {
   req.user
     .populate('cart.items.productId')
     .execPopulate()
@@ -176,8 +226,6 @@ exports.getOrders = (req, res, next) => {
     });
 };
 
-
-
 exports.getInvoice = (req, res, next) => {
   const { orderId } = req.params;
 
@@ -201,7 +249,7 @@ exports.getInvoice = (req, res, next) => {
       pdfDoc.pipe(fs.createWriteStream(invoicePath));
       pdfDoc.pipe(res);
 
-      pdfDoc.fontSize(26).text('Invoice', {underline: true});
+      pdfDoc.fontSize(26).text('Invoice', { underline: true });
 
       pdfDoc.text('------------------');
 
@@ -210,8 +258,15 @@ exports.getInvoice = (req, res, next) => {
       let totalPrice = 0;
       order.products.forEach(prod => {
         totalPrice += prod.quantity * prod.product.price;
-        pdfDoc.text(prod.product.title + ' - ' + prod.quantity + ' x ' + '$' + prod.product.price)
-      })
+        pdfDoc.text(
+          prod.product.title +
+            ' - ' +
+            prod.quantity +
+            ' x ' +
+            '$' +
+            prod.product.price
+        );
+      });
 
       pdfDoc.fontSize(18).text('Total Price: $' + totalPrice);
 

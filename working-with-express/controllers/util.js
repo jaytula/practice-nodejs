@@ -11,10 +11,12 @@ exports.postWebhook = (req, res) => {
   switch (event.type) {
     case 'payment_intent.succeeded':
       const paymentIntent = event.data.object;
+      console.log({paymentIntent});
       console.log('PaymentIntent was successful');
       break;
     case 'payment_method.attached':
       const paymentMethod = event.data.object;
+      console.log({paymentMethod});
       console.log('PaymentMethod was attached to a Customer!');
       break;
     case 'payment_intent.created':

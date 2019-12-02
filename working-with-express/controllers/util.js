@@ -1,3 +1,6 @@
+const User = require('../models/user');
+const Order = require('../models/order');
+
 exports.postWebhook = (req, res) => {
   let event;
 
@@ -15,8 +18,32 @@ exports.postWebhook = (req, res) => {
     case 'payment_method.attached':
     case 'payment_intent.created':
     case 'charge.succeeded':
+      break;
     case 'checkout.session.completed':
-      console.log(dataObject);
+      let savedUser;
+      return User.findById(dataObject.client_reference_id)
+        .populate('cart.items.productId')
+        .then(user => {
+          savedUser = user;
+          console.log({savedUser});
+          const order = new Order({
+            products: user.cart.items.map(i => {
+              return { quantity: i.quantity, product: { ...i.productId._doc } };
+            }),
+            user: {
+              email: user.email,
+              userId: user._id
+            }
+          });
+
+          return order.save();
+        })
+        .then(result => {
+          return savedUser.clearCart();
+        })
+        .then(result => {
+          return res.json({ received: true });
+        });
       break;
     default:
       // Unexpected event type

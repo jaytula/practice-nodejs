@@ -8,26 +8,18 @@ exports.postWebhook = (req, res) => {
   }
 
   // Handle the event
+  console.log(`webhook event: ${event.type}`);
+  const dataObject = event.data.object;
   switch (event.type) {
     case 'payment_intent.succeeded':
-      const paymentIntent = event.data.object;
-      console.log({paymentIntent});
-      console.log('PaymentIntent was successful');
-      break;
     case 'payment_method.attached':
-      const paymentMethod = event.data.object;
-      console.log({paymentMethod});
-      console.log('PaymentMethod was attached to a Customer!');
-      break;
     case 'payment_intent.created':
-      console.log('PaymentIntent created');
-      break;
     case 'charge.succeeded':
-      console.log('Charge succeeded');
+    case 'checkout.session.completed':
+      console.log(dataObject);
       break;
     default:
       // Unexpected event type
-      console.log(event.type);
       return res.status(400).end();
   }
 

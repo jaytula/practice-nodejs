@@ -78,7 +78,6 @@ exports.getCart = (req, res, next) => {
       .populate('cart.items.productId')
       //.execPopulate()
       .then(result => {
-        console.log(result.cart.items);
         res.render('shop/cart', {
           path: '/cart',
           pageTitle: 'Your Cart',
@@ -212,7 +211,6 @@ exports.getCheckoutSuccess = (req, res, next) => {
 exports.getOrders = (req, res, next) => {
   Order.find({ 'user.userId': req.user._id })
     .then(orders => {
-      console.log(orders);
       res.render('shop/orders', {
         path: '/orders',
         pageTitle: 'Your Orders',

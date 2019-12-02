@@ -129,6 +129,7 @@ exports.getCheckout = (req, res, next) => {
 
       return stripe.checkout.sessions.create({
         payment_method_types: ['card'],
+        client_reference_id: req.user._id.toString(),
         line_items: products.map(p => {
           return {
             name: p.productId.title,

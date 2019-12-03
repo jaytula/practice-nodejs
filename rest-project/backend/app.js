@@ -5,6 +5,7 @@ const feedRoutes = require('./routes/feed');
 
 const app = express();
 
+app.use('/images', express.static('images'))
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {

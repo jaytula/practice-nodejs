@@ -13,6 +13,7 @@ class SinglePost extends Component {
   };
 
   componentDidMount() {
+    // eslint-disable-next-line no-unused-vars
     const postId = this.props.match.params.postId;
     fetch('URL')
       .then(res => {

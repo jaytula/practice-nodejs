@@ -5,10 +5,33 @@ const Post = require('../models/post');
 exports.getPosts = (req, res, next) => {
   Post.find().then(posts => {
     res.status(200).json({
+      message: 'Fetched posts successfully',
       posts: posts
     });
+  }).catch(err => {
+    if(!err.statusCode) err.statusCode = 500;
+    next(err);
   })
-  
+};
+
+exports.getPost = (req, res, next) => {
+  const { postId } = req.params;
+
+  Post.findById(postId)
+    .then(post => {
+      if (!post) {
+        const error = new Error('Could not find post.');
+        error.statuCode = 404;
+        throw error;
+      }
+      res.status(200).json({ message: 'Post fetched.', post });
+    })
+    .catch(err => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
 };
 
 exports.createPost = (req, res, next) => {
@@ -32,16 +55,19 @@ exports.createPost = (req, res, next) => {
     }
   });
 
-  post.save().then(result => {
-    console.log(result);
-    res.status(201).json({
-      message: 'Post created successfully',
-      post: result
+  post
+    .save()
+    .then(result => {
+      console.log(result);
+      res.status(201).json({
+        message: 'Post created successfully',
+        post: result
+      });
+    })
+    .catch(err => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
     });
-  }).catch(err => {
-    if (!err.statusCode) {
-      err.statusCode = 500;
-    }
-    next(err);
-  })
 };

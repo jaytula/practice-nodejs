@@ -8,7 +8,29 @@ const feedRoutes = require('./routes/feed');
 
 const app = express();
 
+const multer = require('multer');
+
+const projectRoot = path.dirname(process.mainModule.filename);
+
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'images')
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${new Date().toISOString()}-${file.originalname}`)
+  }
+})
+
+const fileFilter = (req, file, cb) => {
+  const accept = file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg';
+  cb(null, accept);
+}
+
+const upload = multer({ storage: fileStorage, fileFilter});
+
+
 app.use(bodyParser.json());
+app.use(upload.single('image'));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use((req, res, next) => {

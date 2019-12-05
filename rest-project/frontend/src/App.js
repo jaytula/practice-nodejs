@@ -19,7 +19,7 @@ class App extends Component {
   state = {
     showBackdrop: false,
     showMobileNav: false,
-    isAuth: true,
+    isAuth: false,
     token: null,
     userId: null,
     authLoading: false,
@@ -102,10 +102,16 @@ class App extends Component {
   signupHandler = (event, authData) => {
     event.preventDefault();
     this.setState({ authLoading: true });
+    const body = {
+      email: authData.signupForm.email.value,
+      password: authData.signupForm.password.value,
+      name: authData.signupForm.name.value
+    };
+    console.log({ authData, body });
     fetch(`${BACKEND}/auth/signup`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(authData)
+      body: JSON.stringify(body)
     })
       .then(res => {
         if (res.status === 422) {

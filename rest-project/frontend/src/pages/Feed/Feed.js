@@ -52,7 +52,9 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch(`${BACKEND}/feed/posts?page=${page}`)
+    fetch(`${BACKEND}/feed/posts?page=${page}`, {
+      headers: { Authorization:  `Bearer ${this.props.token}`}
+    })
       .then(res => {
         if (res.status !== 200) {
           throw new Error('Failed to fetch posts.');
@@ -176,7 +178,7 @@ class Feed extends Component {
 
   deletePostHandler = postId => {
     this.setState({ postsLoading: true });
-    fetch(`${BACKEND}/feed/post/${postId}`, {method: 'DELETE'})
+    fetch(`${BACKEND}/feed/post/${postId}`, { method: 'DELETE' })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
           throw new Error('Deleting a post failed!');

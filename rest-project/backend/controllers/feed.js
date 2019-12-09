@@ -183,6 +183,12 @@ exports.deletePost = (req, res, next) => {
       return post.delete();
     })
     .then(result => {
+      User.findById(req.userId).then(user => {
+        // user.posts = user.posts.filter(post => post.toString() !== postId);
+        user.posts.pull(postId);
+        return user.save();
+      })
+    }).then(result => {
       console.log(result);
       res.status(200).json({ message: 'Post deleted' });
     })

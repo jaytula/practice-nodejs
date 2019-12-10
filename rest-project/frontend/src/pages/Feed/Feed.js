@@ -1,5 +1,4 @@
 import React, { Component, Fragment } from 'react';
-import openSocket from 'socket.io-client';
 
 import Post from '../../components/Feed/Post/Post';
 import Button from '../../components/Button/Button';
@@ -40,57 +39,6 @@ class Feed extends Component {
       .catch(this.catchError);
 
     this.loadPosts();
-    const socket = openSocket(BACKEND);
-    socket.on('posts', data => {
-      switch (data.action) {
-        case 'create':
-          this.addPost(data.post);
-          break;
-        case 'update':
-          this.updatePost(data.post);
-          break;
-        case 'delete':
-          this.deletePost(data.postId);
-          break;
-        default:
-          console.log(`Action ${data.action} not implemented`);
-      }
-    });
-  }
-
-  addPost = post => {
-    this.setState(prevState => {
-      const updatedPosts = [...prevState.posts];
-      if (prevState.postPage === 1) {
-        updatedPosts.pop();
-        updatedPosts.unshift(post);
-      }
-      return {
-        posts: updatedPosts,
-        totalPosts: prevState.totalPosts + 1
-      };
-    });
-  };
-
-  updatePost = post => {
-    this.setState(prevState => {
-      const updatedPosts = [...prevState.posts];
-      const updatedPostIndex = updatedPosts.findIndex(p => p._id === post._id);
-      if (updatedPostIndex > -1) {
-        updatedPosts[updatedPostIndex] = post;
-      }
-      return {
-        posts: updatedPosts
-      };
-    });
-  };
-
-  deletePost = postId => {
-    this.setState(prevState => {
-      return {
-        posts: prevState.posts.filter(p => p._id !== postId)
-      }
-    })
   }
 
   loadPosts = direction => {

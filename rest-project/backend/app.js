@@ -3,9 +3,10 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const graphqlHttp = require('express-graphql');
 
-const feedRoutes = require('./routes/feed');
-const authRoutes = require('./routes/auth');
+const graphqlSchema = require('./graphql/schema');
+const graphqlResolver = require('./graphql/resolvers');
 
 const app = express();
 
@@ -15,20 +16,22 @@ const projectRoot = path.dirname(process.mainModule.filename);
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'images')
+    cb(null, 'images');
   },
   filename: (req, file, cb) => {
-    cb(null, `${new Date().toISOString()}-${file.originalname}`)
+    cb(null, `${new Date().toISOString()}-${file.originalname}`);
   }
-})
+});
 
 const fileFilter = (req, file, cb) => {
-  const accept = file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg';
+  const accept =
+    file.mimetype === 'image/png' ||
+    file.mimetype === 'image/jpg' ||
+    file.mimetype === 'image/jpeg';
   cb(null, accept);
-}
+};
 
-const upload = multer({ storage: fileStorage, fileFilter});
-
+const upload = multer({ storage: fileStorage, fileFilter });
 
 app.use(bodyParser.json());
 app.use(upload.single('image'));
@@ -44,25 +47,29 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/auth', authRoutes);
-app.use('/feed', feedRoutes);
+app.use(
+  '/graphql',
+  graphqlHttp({
+    schema: graphqlSchema,
+    rootValue: graphqlResolver
+  })
+);
 
 app.use((error, req, res, next) => {
   console.log(error);
   const status = error.statusCode || 500;
   const message = error.message;
   const data = error.data;
-  res.status(status).json({message, data})
-})
+  res.status(status).json({ message, data });
+});
 
 mongoose
-  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true})
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
   .then(() => {
-    const server = app.listen(8080);
-    const io = require('./socket').init(server);
-    io.on('connection', socket => {
-      console.log('Client connected');
-    })
+    app.listen(8080);
     console.log('Running on 8080');
   })
   .catch(err => console.log(err));

@@ -40,7 +40,16 @@ class Feed extends Component {
       .catch(this.catchError);
 
     this.loadPosts();
-    openSocket(BACKEND);
+    const socket = openSocket(BACKEND);
+    socket.on('posts', data => {
+      switch (data.action) {
+        case 'create':
+          this.addPost(data.post);
+          break;
+        default:
+          console.log(`Action ${data.action} not implemented`);
+      }
+    });
   }
 
   addPost = post => {
@@ -176,8 +185,6 @@ class Feed extends Component {
               p => p._id === prevState.editPost._id
             );
             updatedPosts[postIndex] = post;
-          } else if (prevState.posts.length < 2) {
-            updatedPosts = prevState.posts.concat(post);
           }
           return {
             posts: updatedPosts,

@@ -8,30 +8,24 @@ const User = require('../models/user');
 
 const POSTS_PER_PAGE = 2;
 
-exports.getPosts = (req, res, next) => {
+exports.getPosts = async (req, res, next) => {
   let currentPage = req.query.page || 1;
 
-  let totalItems;
+  try {
+    const totalItems = await Post.find().countDocuments();
+    const posts = await Post.find()
+      .skip((currentPage - 1) * POSTS_PER_PAGE)
+      .limit(POSTS_PER_PAGE);
 
-  return Post.find()
-    .countDocuments()
-    .then(count => {
-      totalItems = count;
-      return Post.find()
-        .skip((currentPage - 1) * POSTS_PER_PAGE)
-        .limit(POSTS_PER_PAGE);
-    })
-    .then(posts => {
-      res.status(200).json({
-        message: 'Fetched posts successfully',
-        posts: posts,
-        totalItems
-      });
-    })
-    .catch(err => {
-      if (!err.statusCode) err.statusCode = 500;
-      next(err);
+    res.status(200).json({
+      message: 'Fetched posts successfully',
+      posts: posts,
+      totalItems
     });
+  } catch (err) {
+    if (!err.statusCode) err.statusCode = 500;
+    next(err);
+  }
 };
 
 exports.getPost = (req, res, next) => {
@@ -202,10 +196,10 @@ exports.deletePost = (req, res, next) => {
 exports.getStatus = (req, res, next) => {
   User.findById(req.userId)
     .then(user => {
-      if(!user) {
+      if (!user) {
         const err = new Error('User not found');
         err.statusCode = 400;
-        throw(err);
+        throw err;
       }
       res.json({ status: user.status });
     })

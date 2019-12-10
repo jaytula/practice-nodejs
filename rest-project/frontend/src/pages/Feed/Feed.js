@@ -43,7 +43,7 @@ class Feed extends Component {
     openSocket(BACKEND);
   }
 
-  addPosts = post => {
+  addPost = post => {
     this.setState(prevState => {
       const updatedPosts = [...prevState.posts];
       if (prevState.postPage === 1) {

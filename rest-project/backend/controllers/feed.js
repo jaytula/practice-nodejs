@@ -17,7 +17,7 @@ exports.getPosts = async (req, res, next) => {
     const totalItems = await Post.find().countDocuments();
     const posts = await Post.find()
       .populate('creator')
-      .sort({createdAt: -1})
+      .sort({ createdAt: -1 })
       .skip((currentPage - 1) * POSTS_PER_PAGE)
       .limit(POSTS_PER_PAGE);
 
@@ -139,7 +139,7 @@ exports.updatePost = async (req, res, next) => {
     post.content = content;
     post.imageUrl = imageUrl;
     const result = await post.save();
-    io.getIO().emit('posts', {action: 'update', post: result})
+    io.getIO().emit('posts', { action: 'update', post: result });
     res.status(200).json({ message: 'Post updated', post: result });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
@@ -174,6 +174,7 @@ exports.deletePost = async (req, res, next) => {
     const user = await User.findById(req.userId);
     user.posts.pull(postId);
     await user.save();
+    io.getIO().emit('posts', { action: 'delete', postId });
     res.status(200).json({ message: 'Post deleted' });
   } catch (err) {
     if (!err.statusCode) error.statusCode = 500;

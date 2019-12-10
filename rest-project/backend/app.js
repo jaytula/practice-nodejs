@@ -58,7 +58,11 @@ app.use((error, req, res, next) => {
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true})
   .then(() => {
-    app.listen(8080);
+    const server = app.listen(8080);
+    const io = require('socket.io')(server);
+    io.on('connection', socket => {
+      console.log('Client connected');
+    })
     console.log('Running on 8080');
   })
   .catch(err => console.log(err));

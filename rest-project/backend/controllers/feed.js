@@ -14,6 +14,7 @@ exports.getPosts = async (req, res, next) => {
   try {
     const totalItems = await Post.find().countDocuments();
     const posts = await Post.find()
+      .populate('creator')
       .skip((currentPage - 1) * POSTS_PER_PAGE)
       .limit(POSTS_PER_PAGE);
 
@@ -71,7 +72,7 @@ exports.createPost = async (req, res, next) => {
     content,
     imageUrl: imageUrl,
     creator: req.userId
-  });
+  }).populate('creator');
 
   try {
     await post.save();

@@ -120,31 +120,49 @@ class Feed extends Component {
     this.setState({
       editLoading: true
     });
-    console.log(this.state.editPost);
-    // Set up data (with image!)
-    const formData = new FormData();
-    formData.append('title', postData.title);
-    formData.append('content', postData.content);
-    formData.append('image', postData.image);
-    let url = `${BACKEND}/feed/post`;
-    let method = 'POST';
+
+    let graphqlQuery = {
+      query: `
+      mutation {
+        createPost(postInput: {title: "${postData.title}", content: "${postData.content}", imageUrl: "an image"}) {
+          _id
+          title
+          content
+          imageUrl
+          creator {
+            name
+          }
+          createdAt
+        }
+      }      
+      `
+    };
     if (this.state.editPost) {
-      url = `${BACKEND}/feed/post/${this.state.editPost._id}`;
-      method = 'PUT';
+      //url = `${BACKEND}/feed/post/${this.state.editPost._id}`;
     }
 
-    fetch(url, {
-      method,
-      body: formData,
-      headers: { Authorization: `Bearer ${this.props.token}` }
+    fetch(`${BACKEND}/graphql`, {
+      method: 'POST',
+      body: JSON.stringify(graphqlQuery),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.props.token}`
+      }
     })
       .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error('Creating or editing a post failed!');
-        }
+        console.log('got here 1');
         return res.json();
       })
       .then(resData => {
+        console.log('got here 2');
+        if (resData.errors && resData.errors[0].status === 422) {
+          throw new Error('Creating or editing a post failed!');
+        }
+
+        if (resData.errors) {
+          throw new Error('Post add or edit failed');
+        }
+        console.log(resData);
         this.setState(prevState => {
           return {
             isEditing: false,

@@ -150,11 +150,9 @@ class Feed extends Component {
       }
     })
       .then(res => {
-        console.log('got here 1');
         return res.json();
       })
       .then(resData => {
-        console.log('got here 2');
         if (resData.errors && resData.errors[0].status === 422) {
           throw new Error('Creating or editing a post failed!');
         }
@@ -163,6 +161,13 @@ class Feed extends Component {
           throw new Error('Post add or edit failed');
         }
         console.log(resData);
+        const post = {
+          _id: resData.data.createPost._id,
+          title: resData.data.createPost.title,
+          content: resData.data.createPost.content,
+          creator: resData.data.createPost.creator,
+          createdAt: resData.data.createPost.createAt
+        }
         this.setState(prevState => {
           return {
             isEditing: false,

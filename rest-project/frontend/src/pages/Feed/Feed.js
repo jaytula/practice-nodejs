@@ -197,7 +197,7 @@ class Feed extends Component {
           let updatedPosts = [...prevState.posts];
           if (prevState.editPost) {
             const updatePostIndex = updatedPosts.findIndex(
-              p => p._id == prevState.editPost._id
+              p => p._id === prevState.editPost._id
             );
             updatedPosts[updatePostIndex] = post;
           } else {

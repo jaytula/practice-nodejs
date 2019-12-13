@@ -126,16 +126,22 @@ module.exports = {
     return responseObject;
   },
 
-  async posts(args, req) {
+  async posts({ page }, req) {
     if (!req.isAuth) {
       const error = new Error('Not authenticatd!');
       error.code = 401;
       throw error;
     }
+    const perPage = 2;
+    if(!page) {
+      page = 1;
+    }
 
     const totalPosts = await Post.countDocuments();
     const posts = await Post.find()
       .sort({ createdAt: -1 })
+      .skip((page - 1) * perPage)
+      .limit(perPage)
       .populate('creator');
 
     const responseObject = {

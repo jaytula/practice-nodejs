@@ -147,7 +147,6 @@ module.exports = {
       })),
       totalPosts
     };
-    console.log({ responseObject });
     return responseObject;
   }
 };

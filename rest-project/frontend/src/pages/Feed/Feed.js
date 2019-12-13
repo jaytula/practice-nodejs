@@ -24,19 +24,19 @@ class Feed extends Component {
   };
 
   componentDidMount() {
-    fetch(`${BACKEND}/feed/status`, {
-      headers: { Authorization: `Bearer ${this.props.token}` }
-    })
-      .then(res => {
-        if (res.status !== 200) {
-          throw new Error('Failed to fetch user status.');
-        }
-        return res.json();
-      })
-      .then(resData => {
-        this.setState({ status: resData.status });
-      })
-      .catch(this.catchError);
+    // fetch(`${BACKEND}/feed/status`, {
+    //   headers: { Authorization: `Bearer ${this.props.token}` }
+    // })
+    //   .then(res => {
+    //     if (res.status !== 200) {
+    //       throw new Error('Failed to fetch user status.');
+    //     }
+    //     return res.json();
+    //   })
+    //   .then(resData => {
+    //     this.setState({ status: resData.status });
+    //   })
+    //   .catch(this.catchError);
 
     this.loadPosts();
   }
@@ -54,21 +54,46 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch(`${BACKEND}/feed/posts?page=${page}`, {
-      headers: { Authorization: `Bearer ${this.props.token}` }
+    const graphqlQuery = {
+      query: `
+      {
+        posts {
+          posts {
+            _id
+            title
+            content
+            imageUrl
+            creator {
+              name
+            }
+            createdAt
+          }
+          totalPosts
+        }
+      }
+      `
+    };
+    fetch(`${BACKEND}/graphql`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.props.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(graphqlQuery)
     })
       .then(res => {
-        if (res.status !== 200) {
-          throw new Error('Failed to fetch posts.');
-        }
         return res.json();
       })
       .then(resData => {
+        if (resData.errors) {
+          throw new Error('Fetching posts failed!');
+        }
+        console.log({ resData });
         this.setState({
-          posts: resData.posts.map(post => {
+          posts: resData.data.posts.posts.map(post => {
             return { ...post, imagePath: post.imageUrl };
           }),
-          totalPosts: resData.totalItems,
+          totalPosts: resData.data.posts.totalItems,
           postsLoading: false
         });
       })
@@ -167,9 +192,19 @@ class Feed extends Component {
           content: resData.data.createPost.content,
           creator: resData.data.createPost.creator,
           createdAt: resData.data.createPost.createAt
-        }
+        };
         this.setState(prevState => {
+          let updatedPosts = [...prevState.posts];
+          if (prevState.editPost) {
+            const updatePostIndex = updatedPosts.findIndex(
+              p => p._id == prevState.editPost._id
+            );
+            updatedPosts[updatePostIndex] = post;
+          } else {
+            updatedPosts.unshift(post);
+          }
           return {
+            posts: updatedPosts,
             isEditing: false,
             editPost: null,
             editLoading: false

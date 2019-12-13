@@ -73,7 +73,7 @@ module.exports = {
   },
 
   async createPost({ postInput }, req) {
-    if(!req.isAuth) {
+    if (!req.isAuth) {
       const error = new Error('Not authenticatd!');
       error.code = 401;
       throw error;
@@ -102,7 +102,7 @@ module.exports = {
     }
 
     const user = await User.findById(req.userId);
-    if(!user) {
+    if (!user) {
       const error = new Error('Invalid user.');
       error.code = 401;
       throw error;
@@ -123,6 +123,31 @@ module.exports = {
       createdAt: createdPost.createdAt.toISOString(),
       updatedAt: createdPost.updatedAt.toISOString()
     };
+    return responseObject;
+  },
+
+  async posts(args, req) {
+    if (!req.isAuth) {
+      const error = new Error('Not authenticatd!');
+      error.code = 401;
+      throw error;
+    }
+
+    const totalPosts = await Post.countDocuments();
+    const posts = await Post.find()
+      .sort({ createdAt: -1 })
+      .populate('creator');
+
+    const responseObject = {
+      posts: posts.map(p => ({
+        ...p._doc,
+        _id: p._id.toString(),
+        createdAt: p.createdAt.toISOString(),
+        updatedAt: p.updatedAt.toISOString()
+      })),
+      totalPosts
+    };
+    console.log({ responseObject });
     return responseObject;
   }
 };

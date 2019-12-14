@@ -157,7 +157,7 @@ class Feed extends Component {
         Authorization: `Bearer ${this.props.token}`
       },
       body: formData
-    })
+    }).then(res => res.json())
       .then(fileResData => {
         const imageUrl = fileResData.filePath;
         let graphqlQuery = {

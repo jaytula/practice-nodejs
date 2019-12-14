@@ -146,34 +146,46 @@ class Feed extends Component {
       editLoading: true
     });
 
-    let graphqlQuery = {
-      query: `
-      mutation {
-        createPost(postInput: {title: "${postData.title}", content: "${postData.content}", imageUrl: "an image"}) {
-          _id
-          title
-          content
-          imageUrl
-          creator {
-            name
-          }
-          createdAt
-        }
-      }      
-      `
-    };
+    const formData = new FormData();
+    formData.append('image', postData.image);
     if (this.state.editPost) {
-      //url = `${BACKEND}/feed/post/${this.state.editPost._id}`;
+      formData.append('oldPath', this.state.editPost.imagePath);
     }
-
-    fetch(`${BACKEND}/graphql`, {
-      method: 'POST',
-      body: JSON.stringify(graphqlQuery),
+    fetch(`${BACKEND}/post-image`, {
+      method: 'PUT',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${this.props.token}`
-      }
+      },
+      body: formData
     })
+      .then(fileResData => {
+        const imageUrl = fileResData.filePath;
+        let graphqlQuery = {
+          query: `
+        mutation {
+          createPost(postInput: {title: "${postData.title}", content: "${postData.content}", imageUrl: "${imageUrl}"}) {
+            _id
+            title
+            content
+            imageUrl
+            creator {
+              name
+            }
+            createdAt
+          }
+        }      
+        `
+        };
+
+        return fetch(`${BACKEND}/graphql`, {
+          method: 'POST',
+          body: JSON.stringify(graphqlQuery),
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.props.token}`
+          }
+        });
+      })
       .then(res => {
         return res.json();
       })
@@ -191,7 +203,8 @@ class Feed extends Component {
           title: resData.data.createPost.title,
           content: resData.data.createPost.content,
           creator: resData.data.createPost.creator,
-          createdAt: resData.data.createPost.createAt
+          createdAt: resData.data.createPost.createAt,
+          imagePath: resData.data.createPost.imageUrl
         };
         this.setState(prevState => {
           let updatedPosts = [...prevState.posts];

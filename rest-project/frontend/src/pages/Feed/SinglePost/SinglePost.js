@@ -16,22 +16,40 @@ class SinglePost extends Component {
   componentDidMount() {
     // eslint-disable-next-line no-unused-vars
     const postId = this.props.match.params.postId;
-    fetch(`${BACKEND}/feed/post/${postId}`, {
-      headers: { Authorization: `Bearer ${this.props.token}` }
+    const graphqlQuery = {
+      query: `
+      {
+        post(id: "${postId}") {
+          _id
+          title
+          content
+          imageUrl
+          creator {
+            name
+          }
+          createdAt
+        }
+      }
+      `
+    }
+    fetch(`${BACKEND}/graphql`, {
+      headers: { Authorization: `Bearer ${this.props.token}`, 'Content-Type': 'application/json' },
+      method: 'POST',
+      body: JSON.stringify(graphqlQuery)
     })
       .then(res => {
-        if (res.status !== 200) {
-          throw new Error('Failed to fetch status');
-        }
         return res.json();
       })
       .then(resData => {
+        if(resData.errors) {
+          throw new Error('Single post retrieval failed!');
+        }
         this.setState({
-          title: resData.post.title,
-          author: resData.post.creator.name,
-          image: `${BACKEND}/${resData.post.imageUrl}`,
-          date: new Date(resData.post.createdAt).toLocaleDateString('en-US'),
-          content: resData.post.content
+          title: resData.data.post.title,
+          author: resData.data.post.creator.name,
+          image: `${BACKEND}/${resData.data.post.imageUrl}`,
+          date: new Date(resData.data.post.createdAt).toLocaleDateString('en-US'),
+          content: resData.data.post.content
         });
       })
       .catch(err => {

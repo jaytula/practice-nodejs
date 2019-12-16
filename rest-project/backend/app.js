@@ -4,7 +4,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const graphqlHttp = require('express-graphql');
-const fs = require('fs');
 
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
@@ -15,7 +14,7 @@ const app = express();
 
 const multer = require('multer');
 
-const projectRoot = path.dirname(process.mainModule.filename);
+const { clearImage } = require('./util/file');
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -55,13 +54,8 @@ app.use((req, res, next) => {
 
 app.use(auth);
 
-const clearImage = filePath => {
-  filePath = path.join(__dirname, '..', filePath);
-  fs.unlink(filePath, err => console.log(err));
-};
-
 app.put('/post-image', (req, res, next) => {
-  if(!req.isAuth) {
+  if (!req.isAuth) {
     throw new Error('Not authenticated');
   }
   if (!req.file) {
@@ -76,7 +70,6 @@ app.put('/post-image', (req, res, next) => {
     .status(201)
     .json({ message: 'File store.', filePath: req.file.path });
 });
-
 
 app.use(
   '/graphql',

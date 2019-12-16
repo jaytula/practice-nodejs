@@ -157,7 +157,8 @@ class Feed extends Component {
         Authorization: `Bearer ${this.props.token}`
       },
       body: formData
-    }).then(res => res.json())
+    })
+      .then(res => res.json())
       .then(fileResData => {
         const imageUrl = fileResData.filePath;
         let graphqlQuery = {
@@ -177,7 +178,7 @@ class Feed extends Component {
         `
         };
 
-        if(this.state.editPost) {
+        if (this.state.editPost) {
           graphqlQuery = {
             query: `
           mutation {
@@ -262,22 +263,34 @@ class Feed extends Component {
 
   deletePostHandler = postId => {
     this.setState({ postsLoading: true });
-    fetch(`${BACKEND}/feed/post/${postId}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${this.props.token}` }
+    const graphqlQuery = {
+      query: `
+      mutation {
+        deletePost(id: "${postId}") 
+      }
+      `
+    };
+    fetch(`${BACKEND}/graphql`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.props.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(graphqlQuery)
     })
       .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error('Deleting a post failed!');
-        }
         return res.json();
       })
       .then(resData => {
+        if (resData.errors) {
+          throw new Error('Deleting a post failed!');
+        }
         console.log(resData);
-        this.setState(prevState => {
-          // const updatedPosts = prevState.posts.filter(p => p._id !== postId);
-          return { postsLoading: false };
-        });
+        this.loadPosts();
+        // this.setState(prevState => {
+        //   // const updatedPosts = prevState.posts.filter(p => p._id !== postId);
+        //   return { postsLoading: false };
+        // });
       })
       .catch(err => {
         console.log(err);

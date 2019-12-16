@@ -224,7 +224,7 @@ class Feed extends Component {
           title: resData.data[resDataField].title,
           content: resData.data[resDataField].content,
           creator: resData.data[resDataField].creator,
-          createdAt: resData.data[resDataField].createAt,
+          createdAt: resData.data[resDataField].createdAt,
           imagePath: resData.data[resDataField].imageUrl
         };
         this.setState(prevState => {
@@ -235,7 +235,9 @@ class Feed extends Component {
             );
             updatedPosts[updatePostIndex] = post;
           } else {
-            updatedPosts.pop();
+            if (prevState.posts.length >= 2) {
+              updatedPosts.pop();
+            }
             updatedPosts.unshift(post);
           }
           return {

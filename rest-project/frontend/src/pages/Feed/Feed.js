@@ -121,12 +121,15 @@ class Feed extends Component {
     event.preventDefault();
     const graphqlQuery = {
       query: `
-        mutation {
-          updateStatus(status: "${this.state.status}") {
+        mutation UpdateStatus($status: String!) {
+          updateStatus(status: $status) {
             _id
           }
         }
-      `
+      `,
+      variables: {
+        status: this.state.status
+      }
     };
     fetch(`${BACKEND}/graphql`, {
       method: 'POST',

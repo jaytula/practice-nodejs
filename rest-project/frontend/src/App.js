@@ -63,15 +63,19 @@ class App extends Component {
     this.setState({ authLoading: true });
     const graphqlQuery = {
       query: `
-      {
-        login(email: "${authData.email}", password: "${authData.password}") {
+      query Login($email: String!, $password: String!) {
+        login(email: $email, password: $password) {
           token
           userId
         }
       }
-      `
+      `,
+      variables: {
+        email: authData.email,
+        password: authData.password
+      }
     };
-    
+
     fetch(`${BACKEND}/graphql`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -87,7 +91,7 @@ class App extends Component {
           throw new Error('Validation failed.');
         }
 
-        if(resData.errors) {
+        if (resData.errors) {
           throw new Error('User login failed.');
         }
         this.setState({
@@ -176,7 +180,7 @@ class App extends Component {
     let routes = (
       <Switch>
         <Route
-          path='/'
+          path="/"
           exact
           render={props => (
             <LoginPage
@@ -187,7 +191,7 @@ class App extends Component {
           )}
         />
         <Route
-          path='/signup'
+          path="/signup"
           exact
           render={props => (
             <SignupPage
@@ -197,21 +201,21 @@ class App extends Component {
             />
           )}
         />
-        <Redirect to='/' />
+        <Redirect to="/" />
       </Switch>
     );
     if (this.state.isAuth) {
       routes = (
         <Switch>
           <Route
-            path='/'
+            path="/"
             exact
             render={props => (
               <FeedPage userId={this.state.userId} token={this.state.token} />
             )}
           />
           <Route
-            path='/:postId'
+            path="/:postId"
             render={props => (
               <SinglePostPage
                 {...props}
@@ -220,7 +224,7 @@ class App extends Component {
               />
             )}
           />
-          <Redirect to='/' />
+          <Redirect to="/" />
         </Switch>
       );
     }

@@ -45,7 +45,7 @@ class Feed extends Component {
         return res.json();
       })
       .then(resData => {
-        if(resData.errors) {
+        if (resData.errors) {
           throw new Error('Fetching status failed!');
         }
         this.setState({ status: resData.data.user.status });
@@ -70,8 +70,8 @@ class Feed extends Component {
     }
     const graphqlQuery = {
       query: `
-      {
-        posts(page: ${page}) {
+      query GetPosts($page: Int!) {
+        posts(page: $page) {
           posts {
             _id
             title
@@ -85,7 +85,10 @@ class Feed extends Component {
           totalPosts
         }
       }
-      `
+      `,
+      variables: {
+        page: page
+      }
     };
     fetch(`${BACKEND}/graphql`, {
       method: 'POST',
@@ -137,7 +140,7 @@ class Feed extends Component {
         return res.json();
       })
       .then(resData => {
-        if(resData.errors) {
+        if (resData.errors) {
           throw new Error('Updating status failed');
         }
         console.log(resData);
@@ -342,26 +345,26 @@ class Feed extends Component {
           onCancelEdit={this.cancelEditHandler}
           onFinishEdit={this.finishEditHandler}
         />
-        <section className='feed__status'>
+        <section className="feed__status">
           <form onSubmit={this.statusUpdateHandler}>
             <Input
-              type='text'
-              placeholder='Your status'
-              control='input'
+              type="text"
+              placeholder="Your status"
+              control="input"
               onChange={this.statusInputChangeHandler}
               value={this.state.status}
             />
-            <Button mode='flat' type='submit'>
+            <Button mode="flat" type="submit">
               Update
             </Button>
           </form>
         </section>
-        <section className='feed__control'>
-          <Button mode='raised' design='accent' onClick={this.newPostHandler}>
+        <section className="feed__control">
+          <Button mode="raised" design="accent" onClick={this.newPostHandler}>
             New Post
           </Button>
         </section>
-        <section className='feed'>
+        <section className="feed">
           {this.state.postsLoading && (
             <div style={{ textAlign: 'center', marginTop: '2rem' }}>
               <Loader />

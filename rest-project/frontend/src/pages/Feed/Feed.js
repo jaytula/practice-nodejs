@@ -307,10 +307,13 @@ class Feed extends Component {
     this.setState({ postsLoading: true });
     const graphqlQuery = {
       query: `
-      mutation {
-        deletePost(id: "${postId}") 
+      mutation DeletePost($id: ID!) {
+        deletePost(id: $id) 
       }
-      `
+      `,
+      variables: {
+        id: postId
+      }
     };
     fetch(`${BACKEND}/graphql`, {
       method: 'POST',

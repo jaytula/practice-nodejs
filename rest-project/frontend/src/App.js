@@ -125,13 +125,18 @@ class App extends Component {
 
     const graphqlQuery = {
       query: `
-      mutation {
-        createUser(userInput: {email: "${authData.signupForm.email.value}", name: "${authData.signupForm.name.value}", password: "${authData.signupForm.password.value}"}) {
+      mutation SignupUser($email: String!, $name: String!, $password: String!) {
+        createUser(userInput: {email: $email, name: $name, password: $password}) {
           _id
           email
         }
       }
-      `
+      `,
+      variables: {
+        email: authData.signupForm.email.value,
+        name: authData.signupForm.name.value,
+        password: authData.signupForm.password.value
+      }
     };
     fetch(`${BACKEND}/graphql`, {
       method: 'POST',

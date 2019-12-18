@@ -189,7 +189,7 @@ class Feed extends Component {
     })
       .then(res => res.json())
       .then(fileResData => {
-        const imageUrl = fileResData.filePath;
+        const imageUrl = fileResData.filePath || 'undefined';
         let graphqlQuery = {
           query: `
         mutation {
@@ -210,8 +210,8 @@ class Feed extends Component {
         if (this.state.editPost) {
           graphqlQuery = {
             query: `
-          mutation {
-            updatePost(id: "${this.state.editPost._id}", postInput: {title: "${postData.title}", content: "${postData.content}", imageUrl: "${imageUrl}"}) {
+          mutation UpdatePost($id: ID!, $title: String!, $content: String!, $imageUrl: String!) {
+            updatePost(id: $id, postInput: {title: $title, content: $content, imageUrl: $imageUrl}) {
               _id
               title
               content
@@ -222,7 +222,13 @@ class Feed extends Component {
               createdAt
             }
           }      
-          `
+          `,
+            variables: {
+              id: this.state.editPost._id,
+              title: postData.title,
+              content: postData.content,
+              imageUrl: imageUrl
+            }
           };
         }
 

@@ -4,7 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const graphqlHttp = require('express-graphql');
-
+const helmet = require('helmet');
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
 
@@ -51,7 +51,7 @@ app.use((req, res, next) => {
   }
   next();
 });
-
+app.use(helmet());
 app.use(auth);
 
 app.put('/post-image', (req, res, next) => {
